@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>SIGEFVE - Detalle Vehículo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{font-family:Inter,Arial,sans-serif;background:#f6f9fc;margin:0;padding:16px}
+    .card{background:white;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(20,30,40,0.04);margin-bottom:12px}
+    header{display:flex;justify-content:space-between;align-items:center}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #eef2f6;text-align:left}
+    .btn{background:#2b6cb0;color:white;padding:8px 10px;border-radius:8px;text-decoration:none}
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="titulo">Detalle vehículo</h1>
+    <div><a href="dashboard.html" class="btn">Volver al dashboard</a></div>
+  </header>
+
+  <div class="card" id="infoPrincipal">
+    <!-- Información principal -->
+  </div>
+
+  <div class="card">
+    <h3>Telemetría (últimos registros)</h3>
+    <table id="tablaTelemetria">
+      <thead><tr><th>Timestamp</th><th>Batería</th><th>Lat</th><th>Lon</th><th>Temp Motor</th><th>Velocidad</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Ruta asignada</h3>
+    <div id="rutaAsignada">Ninguna</div>
+  </div>
+
+  <script>
+    // Obtener id desde query param
+    const params = new URLSearchParams(location.search);
+    const vehId = params.get('id') || 'DESCONOCIDO';
+    document.getElementById('titulo').textContent = `Detalle — ${vehId}`;
+
+    // Simulación: obtener detalle (reemplazar con fetch real)
+    const detalleSim = {
+      id: vehId,
+      placas: 'ABC-123',
+      modelo: 'Van Cargo 2023',
+      anio: 2023,
+      estado: 'EN_RUTA',
+      telemetria: [
+        {t:'2025-10-12T08:30:00Z', b:65, lat:19.4326, lon:-99.1332, temp:55, vel:40},
+        {t:'2025-10-12T08:15:00Z', b:68, lat:19.4318, lon:-99.1327, temp:52, vel:35},
+        {t:'2025-10-12T08:00:00Z', b:70, lat:19.4301, lon:-99.1312, temp:50, vel:30}
+      ],
+      ruta: {id:'RUTA-10', origen:'Almacen Central', destinos:['Av. A 10','Calle B 23'], entregasPendientes:2}
+    };
+
+    function renderDetalle(d) {
+      const info = document.getElementById('infoPrincipal');
+      info.innerHTML = `
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-weight:700;font-size:18px">${d.modelo} (${d.placas})</div>
+            <div style="color:#6b7280">Año: ${d.anio} — Estado: ${d.estado}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700">Batería</div>
+            <div style="font-size:20px">${d.telemetria[0].b}%</div>
+            <div style="margin-top:8px"><a href="#" id="btnCambiarEstado" class="btn">Cambiar estado</a></div>
+          </div>
+        </div>
+      `;
+
+      // tabla telemetria
+      const tbody = document.querySelector('#tablaTelemetria tbody');
+      tbody.innerHTML = '';
+      d.telemetria.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(t.t).toLocaleString()}</td><td>${t.b}%</td><td>${t.lat}</td><td>${t.lon}</td><td>${t.temp}°C</td><td>${t.vel} km/h</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // ruta
+      const rutaDiv = document.getElementById('rutaAsignada');
+      rutaDiv.innerHTML = `<strong>${d.ruta.id}</strong> — Origen: ${d.ruta.origen} <br> Destinos: ${d.ruta.destinos.join(', ')} <br> Entregas pendientes: ${d.ruta.entregasPendientes}`;
+    }
+
+    renderDetalle(detalleSim);
+
+    document.getElementById('btnCambiarEstado').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Aquí podrías abrir un modal para cambiar el estado (ej: DISPONIBLE, EN_RUTA, MANTENIMIENTO, CARGANDO).');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>SIGEFVE - Login</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background:#f4f6f8; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+    .card { background:white; padding:24px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,40,0.08); width:360px; }
+    h1{margin:0 0 8px 0;font-size:20px}
+    label{display:block;margin-top:12px;font-size:13px;color:#333}
+    input[type="text"], input[type="password"]{width:100%;padding:10px;border:1px solid #dbe2ea;border-radius:6px;margin-top:6px}
+    button{margin-top:16px;width:100%;padding:10px;border:none;border-radius:8px;background:#2b6cb0;color:white;font-weight:600}
+    .note{font-size:12px;color:#666;margin-top:12px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>SIGEFVE — Iniciar sesión</h1>
+    <label for="usuario">Usuario</label>
+    <input id="usuario" type="text" placeholder="correo o usuario" autocomplete="username" />
+    <label for="contrasena">Contraseña</label>
+    <input id="contrasena" type="password" placeholder="********" autocomplete="current-password" />
+    <button id="btnLogin">Iniciar sesión</button>
+    <div id="msg" class="note"></div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('btnLogin');
+    const msg = document.getElementById('msg');
+
+    btn.addEventListener('click', async () => {
+      const usuario = document.getElementById('usuario').value.trim();
+      const contrasena = document.getElementById('contrasena').value;
+
+      if (!usuario || !contrasena) {
+        msg.textContent = 'Ingresa usuario y contraseña.';
+        return;
+      }
+
+      // Simulación: enviar credenciales al Gateway (reemplazar URL)
+      try {
+        // Ejemplo real:
+        // const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({usuario, contrasena})});
+        // const data = await r.json();
+
+        // Simulación local para pruebas:
+        const data = { token: 'SIMULADO.TOKEN.JWT', usuario };
+
+        // Guardar token
+        localStorage.setItem('sigefve_token', data.token);
+        localStorage.setItem('sigefve_usuario', data.usuario);
+        // Redirigir a dashboard
+        window.location.href = 'dashboard.html';
+      } catch (e) {
+        console.error(e);
+        msg.textContent = 'Error al iniciar sesión (simulado).';
+      }
+    });
+  </script>
+</body>
+</html>

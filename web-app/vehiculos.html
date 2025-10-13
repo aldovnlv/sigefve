@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Vehículos - SIGEFVE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="bg-emerald-600 text-white py-4 shadow-lg">
+    <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">🚗 Gestión de Vehículos</h1>
+      <a href="index.html" class="text-sm underline">Volver al inicio</a>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="max-w-6xl mx-auto py-10 px-6">
+    <h2 class="text-xl font-semibold mb-4">Listado de vehículos eléctricos</h2>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Vehículo 1 -->
+      <a href="vehiculo_detalle.html" class="block bg-white shadow-md hover:shadow-xl rounded-xl p-6 border transition">
+        <img src="https://cdn-icons-png.flaticon.com/512/3209/3209135.png" class="w-12 mb-3" alt="Vehículo">
+        <h3 class="text-lg font-bold text-emerald-700">Van #01</h3>
+        <p>Batería: 82%</p>
+        <p>Estado: En Ruta</p>
+      </a>
+
+      <!-- Vehículo 2 -->
+      <a href="vehiculo_detalle.html" class="block bg-white shadow-md hover:shadow-xl rounded-xl p-6 border transition">
+        <img src="https://cdn-icons-png.flaticon.com/512/3448/3448349.png" class="w-12 mb-3" alt="Vehículo">
+        <h3 class="text-lg font-bold text-emerald-700">Bicicleta #05</h3>
+        <p>Batería: 45%</p>
+        <p>Estado: Disponible</p>
+      </a>
+
+      <!-- Vehículo 3 -->
+      <a href="vehiculo_detalle.html" class="block bg-white shadow-md hover:shadow-xl rounded-xl p-6 border transition">
+        <img src="https://cdn-icons-png.flaticon.com/512/743/743007.png" class="w-12 mb-3" alt="Vehículo">
+        <h3 class="text-lg font-bold text-emerald-700">Moto #09</h3>
+        <p>Batería: 63%</p>
+        <p>Estado: Cargando</p>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>SIGEFVE - Crear / Asignar Ruta</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{font-family:Inter,Arial,sans-serif;background:#f6f9fc;margin:0;padding:16px}
+    .card{background:white;padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(20,30,40,0.04);max-width:820px;margin:auto}
+    label{display:block;margin-top:12px;color:#374151}
+    input, select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6edf3;margin-top:6px}
+    .btn{background:#2b6cb0;color:white;padding:10px 12px;border-radius:8px;border:none;cursor:pointer;margin-top:12px}
+    .destinos{margin-top:8px;display:flex;gap:8px}
+    .destinos input{flex:1}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Crear / Asignar Ruta</h2>
+    <label>Origen</label>
+    <input id="origen" placeholder="Dirección origen" />
+    <label>Destinos</label>
+    <div id="listaDestinos">
+      <div class="destinos"><input class="destino" placeholder="Destino 1" /><button onclick="eliminarDestino(event)" style="display:none">-</button></div>
+    </div>
+    <button id="agregarDestino" class="btn" style="background:#10b981;margin-top:8px">Agregar destino</button>
+
+    <label>Vehículo a asignar</label>
+    <select id="selectVehiculo">
+      <option value="">-- Selecciona un vehículo --</option>
+    </select>
+
+    <label>Fecha/Hora estimada</label>
+    <input id="fechaHora" type="datetime-local" />
+
+    <button id="btnCrear" class="btn">Crear y asignar</button>
+    <div id="msg" style="margin-top:10px;color:#064e3b"></div>
+  </div>
+
+  <script>
+    // Simulación de vehículos para select
+    const vehiculosSim = [{id:'VAN-001', label:'VAN-001 - Van Cargo'}, {id:'BIKE-002', label:'BIKE-002 - Bicicleta'}];
+
+    const selectVeh = document.getElementById('selectVehiculo');
+    vehiculosSim.forEach(v => {
+      const opt = document.createElement('option'); opt.value = v.id; opt.textContent = v.label;
+      selectVeh.appendChild(opt);
+    });
+
+    document.getElementById('agregarDestino').addEventListener('click', (e) => {
+      e.preventDefault();
+      const cont = document.getElementById('listaDestinos');
+      const idx = cont.querySelectorAll('.destino').length + 1;
+      const div = document.createElement('div'); div.className = 'destinos';
+      div.innerHTML = `<input class="destino" placeholder="Destino ${idx}" /><button onclick="eliminarDestino(event)">-</button>`;
+      cont.appendChild(div);
+    });
+
+    function eliminarDestino(e) {
+      e.preventDefault();
+      const btn = e.target;
+      const row = btn.closest('.destinos');
+      row.remove();
+    }
+
+    document.getElementById('btnCrear').addEventListener('click', async () => {
+      const origen = document.getElementById('origen').value.trim();
+      const destinos = Array.from(document.querySelectorAll('.destino')).map(i => i.value.trim()).filter(Boolean);
+      const vehiculo = selectVeh.value;
+      const fechaHora = document.getElementById('fechaHora').value;
+
+      if (!origen || destinos.length === 0 || !vehiculo) {
+        document.getElementById('msg').textContent = 'Completa origen, al menos un destino y selecciona un vehículo.';
+        return;
+      }
+
+      // Aquí enviarías al Gateway: POST /rutas
+      // Simulación:
+      console.log({origen,destinos,vehiculo,fechaHora});
+      document.getElementById('msg').textContent = `Ruta creada y asignada a ${vehiculo} (simulado).`;
+    });
+  </script>
+</body>
+</html>

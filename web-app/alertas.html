@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alertas - SIGEFVE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <header class="bg-red-600 text-white py-4">
+    <div class="max-w-6xl mx-auto flex justify-between items-center px-6">
+      <h1 class="text-2xl font-bold">🚨 Alertas activas</h1>
+      <a href="index.html" class="text-sm underline">Volver al inicio</a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto py-10 px-6 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <a href="alerta_detalle.html" class="bg-white shadow-md hover:shadow-xl rounded-xl p-6 border-t-4 border-red-500">
+      <h3 class="text-lg font-bold text-red-600 mb-2">Van #01</h3>
+      <p>Batería baja: 18%</p>
+      <p>Prioridad: Alta</p>
+    </a>
+
+    <a href="alerta_detalle.html" class="bg-white shadow-md hover:shadow-xl rounded-xl p-6 border-t-4 border-yellow-500">
+      <h3 class="text-lg font-bold text-yellow-600 mb-2">Moto #09</h3>
+      <p>Temperatura alta: 73°C</p>
+      <p>Prioridad: Media</p>
+    </a>
+  </main>
+</body>
+</html>
