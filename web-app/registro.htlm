@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Usuario | SIGEFVE</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a2e0b3a46d.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center justify-center">
+  <div class="bg-gray-800 bg-opacity-90 text-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-green-400 mb-2">Registro de Usuario</h1>
+      <p class="text-gray-400 text-sm">Crea tu cuenta para acceder al sistema SIGEFVE</p>
+    </div>
+
+    <form id="registerForm" action="/api/register" method="POST" class="space-y-4">
+      <!-- Nombre completo -->
+      <div>
+        <label for="nombre" class="block text-sm font-medium mb-1">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" required
+          class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-green-400">
+      </div>
+
+      <!-- Correo -->
+      <div>
+        <label for="correo" class="block text-sm font-medium mb-1">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" required
+          class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-green-400">
+      </div>
+
+      <!-- Contraseña -->
+      <div>
+        <label for="password" class="block text-sm font-medium mb-1">Contraseña</label>
+        <input type="password" id="password" name="password" required minlength="6"
+          class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-green-400">
+      </div>
+
+      <!-- Confirmar contraseña -->
+      <div>
+        <label for="confirmar" class="block text-sm font-medium mb-1">Confirmar contraseña</label>
+        <input type="password" id="confirmar" name="confirmar" required minlength="6"
+          class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-green-400">
+      </div>
+
+      <!-- Rol -->
+      <div>
+        <label for="rol" class="block text-sm font-medium mb-1">Rol</label>
+        <select id="rol" name="rol" required
+          class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-green-400">
+          <option value="" disabled selected>Selecciona un rol</option>
+          <option value="administrador">Administrador</option>
+          <option value="operador">Operador</option>
+          <option value="mecanico">Mecánico</option>
+          <option value="supervisor">Supervisor</option>
+        </select>
+      </div>
+
+      <!-- Botón -->
+      <div class="pt-4">
+        <button type="submit"
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+          <i class="fas fa-user-plus mr-2"></i> Registrar
+        </button>
+      </div>
+    </form>
+
+    <!-- Enlace a login -->
+    <p class="text-sm text-gray-400 text-center mt-6">
+      ¿Ya tienes una cuenta?
+      <a href="login.html" class="text-green-400 hover:underline">Inicia sesión aquí</a>
+    </p>
+
+    <!-- Mensaje de error -->
+    <div id="errorMsg" class="hidden mt-4 text-red-400 text-sm text-center"></div>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const confirmar = document.getElementById('confirmar').value;
+      const errorMsg = document.getElementById('errorMsg');
+
+      if (password !== confirmar) {
+        errorMsg.textContent = 'Las contraseñas no coinciden.';
+        errorMsg.classList.remove('hidden');
+        return;
+      }
+
+      // Aquí puedes agregar la lógica para enviar los datos a tu API
+      // Ejemplo:
+      /*
+      fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: document.getElementById('nombre').value,
+          correo: document.getElementById('correo').value,
+          password: password,
+          rol: document.getElementById('rol').value
+        })
+      }).then(...)
+      */
+
+      alert('Usuario registrado correctamente (simulado).');
+      this.reset();
+    });
+  </script>
+</body>
+</html>
