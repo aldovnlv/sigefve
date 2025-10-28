@@ -223,7 +223,7 @@ class Telemetria {
     
     @Override
     public String toString() {
-        return String.format("Telemetria[id=%d, vehiculo=%d, bateria=%.1f%%, temp=%.1f C, vel=%.1fkm/h, gps=%s]",
+        return String.format("Telemetria[id=%d, vehiculo=%d, bateria=%.1f%%, temp=%.1f c, vel=%.1fkm/h, gps=%s]",
                            id, vehiculoId, nivelBateria, temperaturaMotor, velocidad, ubicacionGps);
     }
 }
