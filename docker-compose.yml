@@ -1,0 +1,29 @@
+'''
+Define las variables de entorno SIGEFVE_BIND_BASE_PATH y SIGEFVE_WEB_PORT en tu sistema para poder iniciar el proyecto.
+SIGEFVE_BIND_BASE_PATH = ruta a la carpeta donde se clona el proyecto.
+SIGEFVE_WEB_PORT = puerto para el servidor web.
+'''
+services:
+  sigefve_frontend:
+    hostname: sigefve_frontend
+    container_name: sigefve_frontend
+    image: debian:12.1
+    ports:
+      - "${SIGEFVE_WEB_PORT}:80"
+    restart: unless-stopped
+    command:
+      - /bin/bash
+      - -c
+      - |
+        export DEBIAN_FRONTEND=noninteractive
+        ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
+        apt -y update
+        apt install -y apache2
+        : apt install -y cron git apache2 iproute2 php php-{curl,zip,mysqli,xml,mbstring,gd,intl,soap}
+        : sed -i 's/^;max_input_vars *= *1000/max_input_vars = 5000/' /etc/php/8.2/apache2/php.ini
+        : echo apache max_input_vars = 5000
+        : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
+        service apache2 start
+        tail -F keep.alive
+    volumes:
+        - ${SIGEFVE_BIND_BASE_PATH}/webapp:/var/www/html
