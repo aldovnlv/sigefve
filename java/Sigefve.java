@@ -110,7 +110,7 @@ class Van extends VehiculoElectrico {
             this.estado = EstadoVehiculo.EN_RUTA;
             System.out.println("Van #" + id + " asignada a ruta: " + ruta.getId());
         } else {
-            System.out.println("Van #" + id + " no está disponible. Estado actual: " + estado);
+            System.out.println("Van #" + id + " no esta disponible. Estado actual: " + estado);
         }
     }
     
@@ -118,7 +118,7 @@ class Van extends VehiculoElectrico {
     public void cargar() {
         this.estado = EstadoVehiculo.CARGANDO;
         this.nivelBateria = 100.0f;
-        System.out.println("Van #" + id + " cargándose...");
+        System.out.println("Van #" + id + " cargandose...");
     }
 }
 
@@ -137,7 +137,7 @@ class BicicletaElectrica extends VehiculoElectrico {
             this.estado = EstadoVehiculo.EN_RUTA;
             System.out.println("Bicicleta #" + id + " asignada a ruta: " + ruta.getId());
         } else {
-            System.out.println("Bicicleta #" + id + " no está disponible. Estado actual: " + estado);
+            System.out.println("Bicicleta #" + id + " no esta disponible. Estado actual: " + estado);
         }
     }
     
@@ -145,7 +145,7 @@ class BicicletaElectrica extends VehiculoElectrico {
     public void cargar() {
         this.estado = EstadoVehiculo.CARGANDO;
         this.nivelBateria = 100.0f;
-        System.out.println("Bicicleta #" + id + " cargándose...");
+        System.out.println("Bicicleta #" + id + " cargandose...");
     }
 }
 
@@ -164,7 +164,7 @@ class MotoElectrica extends VehiculoElectrico {
             this.estado = EstadoVehiculo.EN_RUTA;
             System.out.println("Moto #" + id + " asignada a ruta: " + ruta.getId());
         } else {
-            System.out.println("Moto #" + id + " no está disponible. Estado actual: " + estado);
+            System.out.println("Moto #" + id + " no esta disponible. Estado actual: " + estado);
         }
     }
     
@@ -172,7 +172,7 @@ class MotoElectrica extends VehiculoElectrico {
     public void cargar() {
         this.estado = EstadoVehiculo.CARGANDO;
         this.nivelBateria = 100.0f;
-        System.out.println("Moto #" + id + " cargándose...");
+        System.out.println("Moto #" + id + " cargandose...");
     }
 }
 
@@ -223,7 +223,7 @@ class Telemetria {
     
     @Override
     public String toString() {
-        return String.format("Telemetría[id=%d, vehículo=%d, batería=%.1f%%, temp=%.1f°C, vel=%.1fkm/h, gps=%s]",
+        return String.format("Telemetria[id=%d, vehiculo=%d, bateria=%.1f%%, temp=%.1f°C, vel=%.1fkm/h, gps=%s]",
                            id, vehiculoId, nivelBateria, temperaturaMotor, velocidad, ubicacionGps);
     }
 }
@@ -335,11 +335,11 @@ class GestorFlota {
                 vehiculo = new MotoElectrica(id, modelo, capacidadBateria);
                 break;
             default:
-                throw new IllegalArgumentException("Tipo de vehículo no válido: " + tipo);
+                throw new IllegalArgumentException("Tipo de vehiculo no valido: " + tipo);
         }
         
         vehiculos.put(id, vehiculo);
-        System.out.println("Vehículo creado: " + tipo + " #" + id);
+        System.out.println("Vehiculo creado: " + tipo + " #" + id);
         return vehiculo;
     }
     
@@ -355,7 +355,7 @@ class GestorFlota {
         VehiculoElectrico vehiculo = vehiculos.get(id);
         if (vehiculo != null) {
             vehiculo.setModelo(nuevoModelo);
-            System.out.println("Vehículo #" + id + " actualizado");
+            System.out.println("Vehiculo #" + id + " actualizado");
             return true;
         }
         return false;
@@ -363,19 +363,19 @@ class GestorFlota {
     
     public boolean eliminarVehiculo(int id) {
         if (vehiculos.remove(id) != null) {
-            System.out.println("Vehículo #" + id + " eliminado");
+            System.out.println("Vehiculo #" + id + " eliminado");
             return true;
         }
         return false;
     }
     
-    // ====== Gestión de Telemetria ======
+    // ====== Gestion de Telemetria ======
     
     public Telemetria registrarTelemetria(int vehiculoId, float velocidad, 
                                          float temperaturaMotor, String ubicacionGps) {
         VehiculoElectrico vehiculo = vehiculos.get(vehiculoId);
         if (vehiculo == null) {
-            throw new IllegalArgumentException("Vehículo no encontrado: " + vehiculoId);
+            throw new IllegalArgumentException("Vehiculo no encontrado: " + vehiculoId);
         }
         
         Telemetria telemetria = new Telemetria(
@@ -418,7 +418,7 @@ class GestorFlota {
         return ultima;
     }
     
-    // ====== Gestión de Rutas ======
+    // ====== Gestion de Rutas ======
     
     public Ruta crearRuta(String origen, String destino, float distancia) {
         int id = contadorRutas++;
@@ -433,12 +433,12 @@ class GestorFlota {
         Ruta ruta = rutas.get(rutaId);
         
         if (vehiculo == null || ruta == null) {
-            System.out.println("Vehículo o ruta no encontrados");
+            System.out.println("Vehiculo o ruta no encontrados");
             return false;
         }
         
         if (vehiculo.getEstado() != EstadoVehiculo.DISPONIBLE) {
-            System.out.println("Vehículo no disponible");
+            System.out.println("Vehiculo no disponible");
             return false;
         }
         
@@ -446,13 +446,13 @@ class GestorFlota {
         return true;
     }
     
-    // ====== Gestión de Estados ======
+    // ====== Gestion de Estados ======
     
     public boolean cambiarEstadoVehiculo(int vehiculoId, EstadoVehiculo nuevoEstado) {
         VehiculoElectrico vehiculo = vehiculos.get(vehiculoId);
         if (vehiculo != null) {
             vehiculo.setEstado(nuevoEstado);
-            System.out.println("Vehículo #" + vehiculoId + " cambió a estado: " + nuevoEstado);
+            System.out.println("Vehiculo #" + vehiculoId + " cambio a estado: " + nuevoEstado);
             return true;
         }
         return false;
@@ -471,11 +471,11 @@ class GestorFlota {
     // ====== Estadisticas ======
     
     public void mostrarEstadisticas() {
-        System.out.println("\n=== ESTADÍSTICAS DE LA FLOTA ===");
-        System.out.println("Total de vehículos: " + vehiculos.size());
-        System.out.println("Vehículos disponibles: " + obtenerVehiculosDisponibles().size());
+        System.out.println("\n=== ESTADiSTICAS DE LA FLOTA ===");
+        System.out.println("Total de vehiculos: " + vehiculos.size());
+        System.out.println("Vehiculos disponibles: " + obtenerVehiculosDisponibles().size());
         System.out.println("Rutas creadas: " + rutas.size());
-        System.out.println("Registros de telemetría: " + historialTelemetria.size());
+        System.out.println("Registros de telemetria: " + historialTelemetria.size());
         System.out.println("================================\n");
     }
 }
@@ -498,19 +498,19 @@ class SimuladorTelemetria implements Runnable {
         this.activo = true;
         Thread hilo = new Thread(this);
         hilo.start();
-        System.out.println("Simulador de telemetría iniciado (intervalo: " + intervaloSegundos + "s)");
+        System.out.println("Simulador de telemetria iniciado (intervalo: " + intervaloSegundos + "s)");
     }
     
     public void detener() {
         this.activo = false;
-        System.out.println("Simulador de telemetría detenido");
+        System.out.println("Simulador de telemetria detenido");
     }
     
     @Override
     public void run() {
         while (activo) {
             try {
-                // Generar telemetria para cada vehículo
+                // Generar telemetria para cada vehiculo
                 for (VehiculoElectrico vehiculo : gestorFlota.listarVehiculos()) {
                     generarTelemetriaAleatoria(vehiculo);
                 }
@@ -544,13 +544,13 @@ class SimuladorTelemetria implements Runnable {
 
 public class Sigefve {
     public static void main(String[] args) {
-        System.out.println("=== SISTEMA DE GESTIÓN DE FLOTA DE VEHÍCULOS ELÉCTRICOS ===\n");
+        System.out.println("=== SISTEMA DE GESTIoN DE FLOTA DE VEHiCULOS ELeCTRICOS ===\n");
         
         // Crear gestor de flota
         GestorFlota gestor = new GestorFlota();
         
         // Crear vehiculos
-        System.out.println("--- Creando vehículos ---");
+        System.out.println("--- Creando vehiculos ---");
         gestor.crearVehiculo("van", "Ford E-Transit", 67.0f);
         gestor.crearVehiculo("van", "Mercedes eSprinter", 55.0f);
         gestor.crearVehiculo("bicicleta", "Specialized Turbo", 0.5f);
@@ -574,7 +574,7 @@ public class Sigefve {
         gestor.asignarRutaAVehiculo(3, 2);
         
         // Registrar telemetria manual
-        System.out.println("\n--- Registrando telemetría ---");
+        System.out.println("\n--- Registrando telemetria ---");
         gestor.registrarTelemetria(1, 45.5f, 55.2f, "20.523456,-100.345678");
         gestor.registrarTelemetria(3, 25.0f, 40.1f, "20.534567,-100.356789");
         
@@ -582,9 +582,9 @@ public class Sigefve {
         gestor.mostrarEstadisticas();
         
         // Listar vehiculos
-        System.out.println("--- Estado de vehículos ---");
+        System.out.println("--- Estado de vehiculos ---");
         for (VehiculoElectrico v : gestor.listarVehiculos()) {
-            System.out.printf("Vehículo #%d - Modelo: %s, Estado: %s, Batería: %.1f%%\n",
+            System.out.printf("Vehiculo #%d - Modelo: %s, Estado: %s, Bateria: %.1f%%\n",
                             v.getId(), v.getModelo(), v.getEstado(), v.getNivelBateria());
         }
         
@@ -602,7 +602,7 @@ public class Sigefve {
         }
         
         // Mostrar historial de telemetria
-        System.out.println("\n--- Historial de telemetría del vehículo #1 ---");
+        System.out.println("\n--- Historial de telemetria del vehiculo #1 ---");
         java.util.List<Telemetria> historial = gestor.consultarHistorialTelemetria(1);
         for (Telemetria t : historial) {
             System.out.println(t);
