@@ -26,4 +26,4 @@ services:
         service apache2 start
         tail -F keep.alive
     volumes:
-        - ${SIGEFVE_BIND_BASE_PATH}/webapp:/var/www/html
+        - ${SIGEFVE_BIND_BASE_PATH}/web-app:/var/www/html
