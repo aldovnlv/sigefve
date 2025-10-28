@@ -48,9 +48,9 @@ services:
         : echo apache max_input_vars = 5000
         : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
         pwd
-        wich javac
+        which javac
         javac -d /java/dist /java/Sigefve.java
-        java /java/dist/Sigefve
+        java -d /java/dist Sigefve
         tail -F keep.alive
     volumes:
         - ${SIGEFVE_BIND_BASE_PATH}/java:/java
