@@ -50,7 +50,7 @@ services:
         pwd
         wich javac
         javac -d /java/dist /java/Sigefve.java
-        java /java/dist/Sigefve
+        java -d /java/dist Sigefve
         tail -F keep.alive
     volumes:
         - ${SIGEFVE_BIND_BASE_PATH}/java:/java
