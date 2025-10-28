@@ -50,7 +50,8 @@ services:
         pwd
         which javac
         javac -d /java/dist /java/Sigefve.java
-        java -d /java/dist Sigefve
+        cd /java/dist
+        java Sigefve
         tail -F keep.alive
     volumes:
         - ${SIGEFVE_BIND_BASE_PATH}/java:/java
