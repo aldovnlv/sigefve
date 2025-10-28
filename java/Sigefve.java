@@ -3,7 +3,7 @@
 // ============================================================================
 
 /**
- * Estados posibles de un vehículo en el sistema
+ * Estados posibles de un vehiculo en el sistema
  */
 enum EstadoVehiculo {
     DISPONIBLE,
@@ -17,7 +17,7 @@ enum EstadoVehiculo {
 // ============================================================================
 
 /**
- * Clase abstracta base para todos los vehículos
+ * Clase abstracta base para todos los vehiculos
  */
 abstract class Vehiculo {
     protected int id;
@@ -55,13 +55,13 @@ abstract class Vehiculo {
     }
     
     /**
-     * Método abstracto para asignar ruta al vehículo
+     * Metodo abstracto para asignar ruta al vehiculo
      */
     public abstract void asignarRuta(Ruta ruta);
 }
 
 /**
- * Clase abstracta para vehículos eléctricos
+ * Clase abstracta para vehiculos electricos
  */
 abstract class VehiculoElectrico extends Vehiculo {
     protected float capacidadBateria;
@@ -70,7 +70,7 @@ abstract class VehiculoElectrico extends Vehiculo {
     public VehiculoElectrico(int id, String modelo, float capacidadBateria) {
         super(id, modelo);
         this.capacidadBateria = capacidadBateria;
-        this.nivelBateria = 100.0f; // Inicia con batería completa
+        this.nivelBateria = 100.0f; // Inicia con bateria completa
     }
     
     public float getCapacidadBateria() {
@@ -90,13 +90,13 @@ abstract class VehiculoElectrico extends Vehiculo {
     }
     
     /**
-     * Método abstracto para cargar el vehículo
+     * Metodo abstracto para cargar el vehiculo
      */
     public abstract void cargar();
 }
 
 /**
- * Clase concreta para vanes eléctricas
+ * Clase concreta para vanes electricas
  */
 class Van extends VehiculoElectrico {
     
@@ -123,7 +123,7 @@ class Van extends VehiculoElectrico {
 }
 
 /**
- * Clase concreta para bicicletas eléctricas
+ * Clase concreta para bicicletas electricas
  */
 class BicicletaElectrica extends VehiculoElectrico {
     
@@ -150,7 +150,7 @@ class BicicletaElectrica extends VehiculoElectrico {
 }
 
 /**
- * Clase concreta para motos eléctricas
+ * Clase concreta para motos electricas
  */
 class MotoElectrica extends VehiculoElectrico {
     
@@ -177,7 +177,7 @@ class MotoElectrica extends VehiculoElectrico {
 }
 
 /**
- * Clase para almacenar datos de telemetría
+ * Clase para almacenar datos de telemetria
  */
 class Telemetria {
     private int id;
@@ -299,7 +299,7 @@ class Ruta {
 // ============================================================================
 
 /**
- * Gestor principal de la flota de vehículos
+ * Gestor principal de la flota de vehiculos
  */
 class GestorFlota {
     private java.util.Map<Integer, VehiculoElectrico> vehiculos;
@@ -318,7 +318,7 @@ class GestorFlota {
         this.contadorTelemetria = 1;
     }
     
-    // ====== CRUD de Vehículos ======
+    // ====== CRUD de Vehiculos ======
     
     public VehiculoElectrico crearVehiculo(String tipo, String modelo, float capacidadBateria) {
         VehiculoElectrico vehiculo;
@@ -369,7 +369,7 @@ class GestorFlota {
         return false;
     }
     
-    // ====== Gestión de Telemetría ======
+    // ====== Gestión de Telemetria ======
     
     public Telemetria registrarTelemetria(int vehiculoId, float velocidad, 
                                          float temperaturaMotor, String ubicacionGps) {
@@ -389,7 +389,7 @@ class GestorFlota {
         
         historialTelemetria.add(telemetria);
         
-        // Simular desgaste de batería basado en velocidad
+        // Simular desgaste de bateria basado en velocidad
         if (vehiculo.getEstado() == EstadoVehiculo.EN_RUTA) {
             float desgaste = velocidad * 0.01f;
             vehiculo.setNivelBateria(vehiculo.getNivelBateria() - desgaste);
@@ -468,7 +468,7 @@ class GestorFlota {
         return disponibles;
     }
     
-    // ====== Estadísticas ======
+    // ====== Estadisticas ======
     
     public void mostrarEstadisticas() {
         System.out.println("\n=== ESTADÍSTICAS DE LA FLOTA ===");
@@ -481,7 +481,7 @@ class GestorFlota {
 }
 
 /**
- * Simulador de telemetría que genera datos periódicamente
+ * Simulador de telemetria que genera datos periodicamente
  */
 class SimuladorTelemetria implements Runnable {
     private GestorFlota gestorFlota;
@@ -510,7 +510,7 @@ class SimuladorTelemetria implements Runnable {
     public void run() {
         while (activo) {
             try {
-                // Generar telemetría para cada vehículo
+                // Generar telemetria para cada vehículo
                 for (VehiculoElectrico vehiculo : gestorFlota.listarVehiculos()) {
                     generarTelemetriaAleatoria(vehiculo);
                 }
@@ -549,7 +549,7 @@ public class Sigefve {
         // Crear gestor de flota
         GestorFlota gestor = new GestorFlota();
         
-        // Crear vehículos
+        // Crear vehiculos
         System.out.println("--- Creando vehículos ---");
         gestor.crearVehiculo("van", "Ford E-Transit", 67.0f);
         gestor.crearVehiculo("van", "Mercedes eSprinter", 55.0f);
@@ -573,22 +573,22 @@ public class Sigefve {
         gestor.asignarRutaAVehiculo(1, 1);
         gestor.asignarRutaAVehiculo(3, 2);
         
-        // Registrar telemetría manual
+        // Registrar telemetria manual
         System.out.println("\n--- Registrando telemetría ---");
         gestor.registrarTelemetria(1, 45.5f, 55.2f, "20.523456,-100.345678");
         gestor.registrarTelemetria(3, 25.0f, 40.1f, "20.534567,-100.356789");
         
-        // Mostrar estadísticas
+        // Mostrar estadisticas
         gestor.mostrarEstadisticas();
         
-        // Listar vehículos
+        // Listar vehiculos
         System.out.println("--- Estado de vehículos ---");
         for (VehiculoElectrico v : gestor.listarVehiculos()) {
             System.out.printf("Vehículo #%d - Modelo: %s, Estado: %s, Batería: %.1f%%\n",
                             v.getId(), v.getModelo(), v.getEstado(), v.getNivelBateria());
         }
         
-        // Iniciar simulador de telemetría (opcional)
+        // Iniciar simulador de telemetria (opcional)
         System.out.println("\n--- Iniciando simulador (5 segundos) ---");
         SimuladorTelemetria simulador = new SimuladorTelemetria(gestor, 5);
         simulador.iniciar();
@@ -601,14 +601,14 @@ public class Sigefve {
             e.printStackTrace();
         }
         
-        // Mostrar historial de telemetría
+        // Mostrar historial de telemetria
         System.out.println("\n--- Historial de telemetría del vehículo #1 ---");
         java.util.List<Telemetria> historial = gestor.consultarHistorialTelemetria(1);
         for (Telemetria t : historial) {
             System.out.println(t);
         }
         
-        // Estadísticas finales
+        // Estadisticas finales
         gestor.mostrarEstadisticas();
         
         System.out.println("\n=== FIN DEL PROGRAMA ===");
