@@ -1,5 +1,5 @@
 # '''
-# Define las variables de entorno SIGEFVE_BIND_BASE_PATH y SIGEFVE_WEB_PORT en tu sistema para poder iniciar el proyecto.
+# Define las variables de entorno SIGEFVE_BIND_BASE_PATH y SIGEFVE_WEB_PORT para poder iniciar el proyecto.
 # SIGEFVE_BIND_BASE_PATH = ruta a la carpeta donde se clona el proyecto.
 # SIGEFVE_WEB_PORT = puerto para el servidor web.
 # '''
