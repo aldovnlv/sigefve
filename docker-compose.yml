@@ -32,8 +32,8 @@ services:
     hostname: sigefve_python
     container_name: sigefve_python
     image: debian:12.1
-    #ports:
-    #  - "${SIGEFVE_WEB_PORT}:80"
+    ports:
+      - "1222:5001"
     restart: unless-stopped
     command:
       - /bin/bash
