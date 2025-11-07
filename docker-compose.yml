@@ -50,6 +50,7 @@ services:
         pwd
         which python3
         which pip3
+        cd /python
         python3 -m venv python/venv
         source python/venv/bin/activate
         pip3 install flask requests
