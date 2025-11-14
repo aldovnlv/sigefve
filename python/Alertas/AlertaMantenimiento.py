@@ -18,4 +18,11 @@ class AlertaMantenimiento(Alerta, Notificable, Registrable):
         self.guardar()
 
     def verificar_kilometraje(self):
-        return self._kilometraje_actual >= Config.KILOMETRAJE_MANTENIMIENTO
+        mantenimiento = self._kilometraje_actual >= Config.KILOMETRAJE_MANTENIMIENTO
+        
+        if (mantenimiento):
+            self.activar()
+            self.enviar_notificacion()
+            self.registrar_evento()
+
+        return mantenimiento

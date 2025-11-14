@@ -1,11 +1,11 @@
 import Config
-
+import datetime
 
 class Alerta:
     """
     Clase base para las alertas generadas por el sistema.
     """
-    def __init__(self, id, tipo, descripcion, prioridad, fecha_generacion, id_vehiculo, estado=False):
+    def __init__(self, tipo, descripcion, prioridad, id_vehiculo, id = -1, estado=False, fecha_generacion = datetime.datetime.now()):
         self._id = id
         self._tipo = tipo
         self._descripcion = descripcion

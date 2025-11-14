@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 analizador = AnalizadorRendimiento()
 gestor_eventos = GestorEventos()
-observador = ObservadorTelemetria(analizador, gestor_eventos)
+observador = ObservadorTelemetria(gestor_eventos)
 
 class ServicioPython:
     """
@@ -35,6 +35,20 @@ class ServicioPython:
                 return jsonify({"mensaje": "Telemetría procesada"}), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+            
+        def _formatear_alertas(alertas):
+            resultado = []
+            for alerta in alertas:
+                resultado.append({
+                    'id': alerta[0],
+                    'tipo': alerta[1],
+                    'descripcion': alerta[2],
+                    'prioridad': alerta[3],
+                    'fecha_generacion': alerta[4],
+                    'estado': alerta[5],
+                    'vehiculo_id': alerta[6]
+                })
+            return resultado
 
         @app.route('/alertas', methods=['GET'])
         def listar_alertas():
@@ -43,23 +57,33 @@ class ServicioPython:
                 conn = Config.obtener_conexion()
                 cursor = conn.cursor()
                 cursor.execute(
-                    'SELECT * FROM alertas WHERE estado = "ACTIVA" ORDER BY prioridad ASC, fecha_generacion DESC')
+                    'SELECT * FROM alertas WHERE estado = true ORDER BY prioridad ASC, fecha_generacion DESC')
                 alertas = cursor.fetchall()
                 conn.close()
 
-                resultado = []
-                for alerta in alertas:
-                    resultado.append({
-                        'id': alerta[0],
-                        'tipo': alerta[1],
-                        'descripcion': alerta[2],
-                        'prioridad': alerta[3],
-                        'fecha_generacion': alerta[4],
-                        'estado': alerta[5],
-                        'vehiculo_id': alerta[6]
-                    })
+                return jsonify({
+                    'alertas': _formatear_alertas(alertas)
+                }), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+            
+        @app.route('/alertas/<int:id_vehiculo>', methods=['GET'])
+        def listar_alertas_por_vehiculo(id_vehiculo):
+            """Lista las alertas activas de un vehículo ordenadas por prioridad"""
+            try:
+                if id_vehiculo:
+                    conn = Config.obtener_conexion()
+                    cursor = conn.cursor()
+                    cursor.execute(
+                    'SELECT * FROM alertas WHERE estado = true AND id_vehiculo = ' + str(id_vehiculo) + ' ORDER BY prioridad ASC, fecha_generacion DESC')
+                    alertas = cursor.fetchall()
+                    conn.close()
 
-                return jsonify(resultado), 200
+                    return jsonify({
+                        'alertas': _formatear_alertas(alertas)
+                    }), 200
+                else:
+                    return jsonify({'error': 'No hay un "id_vehiculo" especificado.'}), 406
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 

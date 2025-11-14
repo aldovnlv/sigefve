@@ -8,13 +8,11 @@ class ObservadorTelemetria:
     Observador que recibe datos de telemetría desde el microservicio Java.
     """
 
-    def __init__(self, analizador, gestor = GestorEventos()):
+    def __init__(self, gestor = GestorEventos()):
         self._suscriptores = []
-        self._analizador = analizador
         self._gestor = gestor
 
     def recibir_datos(self, telemetria):
-        # Enviar a analizador para estadísticas
         #self._analizador.procesar_datos(telemetria)
 
         # Notificar al gestor para generar alertas
