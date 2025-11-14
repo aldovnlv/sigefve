@@ -86,6 +86,78 @@ class ServicioPython:
                     return jsonify({'error': 'No hay un "id_vehiculo" especificado.'}), 406
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+            
+        @app.route('/alertas/desactivar', methods=['PATCH'])
+        def desactivar_alertas():
+            """Desactiva todas las alertas"""
+            try:
+                conn = Config.obtener_conexion()
+                cursor = conn.cursor()
+                
+                cursor.execute('UPDATE alertas SET estado = false')
+                conn.commit()
+
+                cursor.execute(
+                'SELECT * FROM alertas ORDER BY prioridad ASC, fecha_generacion DESC'
+                )
+                alertas = cursor.fetchall()
+                conn.close()
+
+                return jsonify({
+                    'alertas': _formatear_alertas(alertas)
+                }), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+            
+        @app.route('/alertas/<int:id_vehiculo>/desactivar', methods=['PATCH'])
+        def desactivar_alertas_por_vehiculo(id_vehiculo):
+            """Desactiva todas las alertas"""
+            try:
+                if id_vehiculo:
+                    conn = Config.obtener_conexion()
+                    cursor = conn.cursor()
+                
+                    cursor.execute('UPDATE alertas SET estado = false WHERE id_vehiculo = ' + str(id_vehiculo))
+                    conn.commit()
+
+                    cursor.execute(
+                    'SELECT * FROM alertas WHERE id_vehiculo = ' + str(id_vehiculo) + ' ORDER BY prioridad ASC, fecha_generacion DESC'
+                    )
+                    alertas = cursor.fetchall()
+                    conn.close()
+
+                    return jsonify({
+                        'alertas': _formatear_alertas(alertas)
+                    }), 200
+                else:
+                    return jsonify({'error': 'No hay un "id_vehiculo" especificado.'}), 406
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+            
+        @app.route('/alertas/desactivar/id/<int:id>', methods=['PATCH'])
+        def desactivar_alertas_por_id(id):
+            """Desactiva todas las alertas"""
+            try:
+                if id:
+                    conn = Config.obtener_conexion()
+                    cursor = conn.cursor()
+                
+                    cursor.execute('UPDATE alertas SET estado = false WHERE id = ' + str(id))
+                    conn.commit()
+
+                    cursor.execute(
+                    'SELECT * FROM alertas WHERE id = ' + str(id) + ' ORDER BY prioridad ASC, fecha_generacion DESC'
+                    )
+                    alertas = cursor.fetchall()
+                    conn.close()
+
+                    return jsonify({
+                        'alertas': _formatear_alertas(alertas)
+                    }), 200
+                else:
+                    return jsonify({'error': 'No hay un "id" especificado.'}), 406
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
 
         @app.route('/estadisticas/<int:id_vehiculo>', methods=['GET'])
         def obtener_estadisticas(id_vehiculo):
@@ -99,7 +171,6 @@ class ServicioPython:
                     else:
                         return jsonify({"error": "No se encontraron datos para el vehículo"}), 404
                 else:
-                    # Retornar estadísticas en memoria
                     reporte = analizador.generar_reporte()
                     return jsonify(reporte), 200
             except Exception as e:
