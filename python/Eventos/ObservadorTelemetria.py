@@ -15,7 +15,7 @@ class ObservadorTelemetria:
 
     def recibir_datos(self, telemetria):
         # Enviar a analizador para estadísticas
-        self._analizador.procesar_datos(telemetria)
+        #self._analizador.procesar_datos(telemetria)
 
         # Notificar al gestor para generar alertas
         evento = {'telemetria': telemetria}
