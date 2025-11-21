@@ -173,7 +173,7 @@ class ServicioPython:
                 return jsonify({"error": str(e)}), 500
 
         @app.route('/estadisticas/<int:id_vehiculo>', methods=['GET'])
-        def obtener_estadisticas(id_vehiculo):
+        def obtener_estadisticas_por_vechiulo(id_vehiculo):
             """Obtiene estadísticas de rendimiento de un vehículo específico"""
             try:
                 if id_vehiculo:
