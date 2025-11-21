@@ -9,7 +9,6 @@ from flasgger import Swagger
 # Inicialización de componentes globales
 app = Flask(__name__)
 
-# Configuración de Swagger para que luzca profesional
 app.config['SWAGGER'] = {
     'title': 'API Telemetría SIGEFVE',
     'uiversion': 3,
@@ -191,7 +190,7 @@ class ServicioPython:
         @app.route('/alertas/desactivar', methods=['PATCH'])
         def desactivar_alertas():
             """
-            Realiza el cierre masivo de alertas (Soft Delete).
+            Realiza el cierre masivo de alertas.
             ---
             tags:
               - Gestión de Alertas
@@ -323,7 +322,7 @@ class ServicioPython:
         @app.route('/reporte/csv', methods=['GET'])
         def exportar_reporte_csv():
             """
-            Exporta el reporte histórico a CSV.
+            Exporta el reporte histórico a CSV (WIP).
             ---
             tags:
               - Reportes
