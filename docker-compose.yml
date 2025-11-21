@@ -53,7 +53,7 @@ services:
         cd /python
         python3 -m venv python/venv
         source python/venv/bin/activate
-        pip3 install flask requests
+        pip3 install flask flasgger requests
         python3 app.py
         tail -F keep.alive
     volumes:
