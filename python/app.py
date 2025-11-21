@@ -158,6 +158,19 @@ class ServicioPython:
                     return jsonify({'error': 'No hay un "id" especificado.'}), 406
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+            
+        @app.route('/estadisticas', methods=['GET'])
+        def obtener_estadisticas():
+            """Obtiene estadísticas de rendimiento de todos vehículos"""
+            try:
+                # Analizar vehículo específico desde Java
+                    resultado = analizador.analizar_vehiculos()
+                    if resultado:
+                        return jsonify(resultado), 200
+                    else:
+                        return jsonify({"error": "No se encontraron datos de vehículos"}), 404
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
 
         @app.route('/estadisticas/<int:id_vehiculo>', methods=['GET'])
         def obtener_estadisticas(id_vehiculo):

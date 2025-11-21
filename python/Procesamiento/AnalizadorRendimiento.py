@@ -14,6 +14,21 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
     def __init__(self):
         self._datos_vehiculos = {}
 
+    def obtener_vehiculos_java(self):
+        """Obtiene todos los vehículos desde el microservicio Java"""
+        try:
+            url = f"{cf.JAVA_URL}/vehiculos"
+            response = requests.get(url, timeout=5)
+
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"[ERROR] Error al obtener vehículos: {response.status_code}")
+                return []
+        except requests.exceptions.RequestException as e:
+            print(f"[ERROR] No se pudo conectar con Java service: {e}")
+            return []
+
     def obtener_telemetria_java(self, id_vehiculo):
         """Obtiene datos de telemetría desde el microservicio Java"""
         try:
@@ -86,6 +101,35 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
             'eficiencia_bateria': self.calcular_eficiencia_bateria(id_vehiculo),
             'entregas': self._datos_vehiculos[id_vehiculo]['entregas']
         }
+    
+    def analizar_vehiculos(self):
+        """Analiza todo el historial de telemetría de todos los vehículos desde Java"""
+        print("[ANALISIS] Obteniendo lista de vehículos...")
+    
+        vehiculos = self.obtener_vehiculos_java()
+    
+        if not vehiculos:
+            print("[ANALISIS] No se encontraron vehículos")
+            return []
+    
+        print(f"[ANALISIS] Se encontraron {len(vehiculos)} vehículos. Procesando...")
+    
+        resultados = []
+    
+        for vehiculo in vehiculos:
+            id_vehiculo = vehiculo.get('id')
+        
+            if id_vehiculo:
+                print(f"[ANALISIS] Analizando vehículo ID: {id_vehiculo}")
+            
+                resultado = self.analizar_vehiculo(id_vehiculo)
+            
+                if resultado:
+                    resultados.append(resultado)
+    
+        print(f"[ANALISIS] Análisis completado. {len(resultados)} vehículos procesados exitosamente.")
+    
+        return resultados
 
     def procesar_datos(self, telemetria):
         id_vehiculo = telemetria.get('id_vehiculo')
