@@ -110,7 +110,8 @@ services:
         ls
         which go
         source $HOME/.profile
-        export PATH=$PATH:/usr/local/go/bin
+        : export PATH=$PATH:/usr/local/go/bin
+        PATH=$PATH:/usr/local/go/bin
         go version
         tail -F keep.alive
     volumes:
