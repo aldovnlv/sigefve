@@ -111,7 +111,6 @@ services:
         pwd
         ls
         which go
-        source $HOME/.profile
         go version
         tail -F keep.alive
     volumes:
