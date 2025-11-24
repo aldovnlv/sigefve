@@ -62,24 +62,20 @@ services:
     #ports:
     #  - "${SIGEFVE_WEB_PORT}:80"
     restart: unless-stopped
-    environment:
-      - PATH=/usr/local/go/bin:PATH
+    # environment:
+    #   - PATH=/usr/local/go/bin:PATH
     command:
       - /bin/bash
       - -c
       - |
-        env
         export DEBIAN_FRONTEND=noninteractive
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
         apt -y update
         apt install -y wget
         wget https://go.dev/dl/go1.25.4.linux-amd64.tar.gz
         rm -rf /usr/local/go && tar -C /usr/local -xzf go1.25.4.linux-amd64.tar.gz
-        : export PATH=/usr/local/go/bin:$$PATH
+        export PATH=/usr/local/go/bin:$$PATH
         pwd
-        ls
-        which go
-        go version
         tail -F keep.alive
     volumes:
         - ${SIGEFVE_BIND_BASE_PATH}/java:/java
