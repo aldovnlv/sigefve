@@ -100,7 +100,6 @@ services:
       - -c
       - |
         env
-        export DEBIAN_FRONTEND=noninteractive
         export PATH=$PATH:/usr/local/go/bin
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
         apt -y update
@@ -109,6 +108,7 @@ services:
         pwd
         ls
         which go
+        export DEBIAN_FRONTEND=noninteractive
         go version
         tail -F keep.alive
     volumes:
