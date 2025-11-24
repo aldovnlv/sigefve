@@ -87,3 +87,24 @@ services:
         tail -F keep.alive
     volumes:
         - ${SIGEFVE_BIND_BASE_PATH}/java:/java
+
+  sigefve_go:
+    hostname: sigefve_go
+    container_name: sigefve_go
+    image: debian:12.1
+    #ports:
+    #  - "${SIGEFVE_WEB_PORT}:80"
+    restart: unless-stopped
+    command:
+      - /bin/bash
+      - -c
+      - |
+        export DEBIAN_FRONTEND=noninteractive
+        ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
+        apt -y update
+        apt install -y go
+        pwd
+        which go
+        tail -F keep.alive
+    volumes:
+        - ${SIGEFVE_BIND_BASE_PATH}/java:/java
