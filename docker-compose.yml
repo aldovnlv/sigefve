@@ -66,6 +66,7 @@ services:
       - /bin/bash
       - -c
       - |
+        env
         export DEBIAN_FRONTEND=noninteractive
         export PATH=$PATH:/usr/local/go/bin
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
