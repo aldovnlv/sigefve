@@ -59,8 +59,8 @@ services:
     hostname: sigefve_go
     container_name: sigefve_go
     image: debian:12.1
-    #ports:
-    #  - "${SIGEFVE_WEB_PORT}:80"
+    ports:
+     - "${SIGEFVE_GO_PORT}:8080"
     restart: unless-stopped
     # environment:
     #   - PATH=/usr/local/go/bin:PATH
