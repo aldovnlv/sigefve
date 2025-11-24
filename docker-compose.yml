@@ -82,4 +82,4 @@ services:
         go run main.go
         tail -F keep.alive
     volumes:
-        - ${SIGEFVE_BIND_BASE_PATH}/java:/java
+        - ${SIGEFVE_BIND_BASE_PATH}/go:/go
