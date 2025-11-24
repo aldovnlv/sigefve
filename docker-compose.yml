@@ -94,9 +94,9 @@ services:
     image: debian:12.1
     #ports:
     #  - "${SIGEFVE_WEB_PORT}:80"
-    restart: unless-stopped
-    environment:
-      - PATH=/usr/local/go/bin:${PATH}
+    #restart: unless-stopped
+    # environment:
+    #   - PATH=/usr/local/go/bin:${PATH}
     command:
       - /bin/bash
       - -c
@@ -108,6 +108,7 @@ services:
         apt install -y wget
         wget https://go.dev/dl/go1.25.4.linux-amd64.tar.gz
         rm -rf /usr/local/go && tar -C /usr/local -xzf go1.25.4.linux-amd64.tar.gz
+        export PATH=/usr/local/go/bin:$PATH
         pwd
         ls
         which go
