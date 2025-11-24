@@ -108,7 +108,7 @@ services:
         apt install -y wget
         wget https://go.dev/dl/go1.25.4.linux-amd64.tar.gz
         rm -rf /usr/local/go && tar -C /usr/local -xzf go1.25.4.linux-amd64.tar.gz
-        export PATH=/var/www/bin:$$PATH
+        export PATH=/usr/local/go/bin:$$PATH
         echo ===========================================================
         env
         echo ===========================================================
