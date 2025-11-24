@@ -67,7 +67,7 @@ services:
       - -c
       - |
         env
-        export PATH=$PATH:/usr/local/go/bin
+        export DEBIAN_FRONTEND=noninteractive
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
         apt -y update
         wget -b https://go.dev/dl/go1.25.4.linux-amd64.tar.gz
@@ -75,7 +75,7 @@ services:
         pwd
         ls
         which go
-        export DEBIAN_FRONTEND=noninteractive
+        export PATH=$PATH:/usr/local/go/bin
         go version
         tail -F keep.alive
     volumes:
