@@ -1,3 +1,5 @@
+# Alertas/Alerta.py
+
 import Config
 import datetime
 
@@ -5,9 +7,8 @@ class Alerta:
     """
     Clase base para las alertas generadas por el sistema.
     """
-    def __init__(self, tipo, descripcion, prioridad, id_vehiculo, id = -1, estado=False, fecha_generacion = datetime.datetime.now()):
+    def __init__(self, descripcion, id_vehiculo, prioridad, id = -1, estado=True, fecha_generacion = datetime.datetime.now()):
         self._id = id
-        self._tipo = tipo
         self._descripcion = descripcion
         self._prioridad = prioridad
         self._fecha_generacion = fecha_generacion
@@ -21,15 +22,7 @@ class Alerta:
     @id.setter
     def id(self, id):
         self._id = id
-
-    @property
-    def tipo(self):
-        return self._tipo
-
-    @tipo.setter
-    def tipo(self, tipo):
-        self._tipo = tipo
-
+        
     @property
     def descripcion(self):
         return self._descripcion
@@ -76,10 +69,11 @@ class Alerta:
         conn = Config.obtener_conexion()
         cursor = conn.cursor()
         cursor.execute('''
-                       INSERT INTO alertas (tipo, descripcion, prioridad, fecha_generacion, estado, id_vehiculo)
-                       VALUES (?, ?, ?, ?, ?, ?)
-                       ''', (self._tipo, self._descripcion, self._prioridad, self._fecha_generacion, self._estado,
+                       INSERT INTO alerta (descripcion, prioridad, fecha_generacion, estado, id_vehiculo)
+                       VALUES (?, ?, ?, ?, ?)
+                       ''', (self._descripcion, self._prioridad, self._fecha_generacion, self._estado,
                              self._id_vehiculo))
         self._id = cursor.lastrowid
         conn.commit()
         conn.close()
+        return self._id

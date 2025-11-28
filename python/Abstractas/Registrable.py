@@ -1,3 +1,5 @@
+# Abstractas/Registrable.py
+
 from abc import ABC, abstractmethod
 
 class Registrable(ABC):

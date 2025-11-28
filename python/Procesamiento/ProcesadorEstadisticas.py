@@ -1,3 +1,5 @@
+# Procesamiento/ProcesadorEstadisticas.py
+
 from abc import ABC, abstractmethod
 
 class ProcesadorEstadisticas(ABC):
