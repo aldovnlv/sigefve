@@ -13,8 +13,6 @@ class ObservadorTelemetria:
         self._gestor = gestor
 
     def recibir_datos(self, telemetria):
-        #self._analizador.procesar_datos(telemetria)
-
         # Notificar al gestor para generar alertas
         evento = {'telemetria': telemetria}
         self._gestor.actualizar(evento)

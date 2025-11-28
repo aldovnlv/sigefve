@@ -1,19 +1,22 @@
+# app.py
+
 import Config
 from Config import Config as cf
 from Eventos.GestorEventos import GestorEventos
 from Eventos.ObservadorTelemetria import ObservadorTelemetria
 from Procesamiento.AnalizadorRendimiento import AnalizadorRendimiento
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flasgger import Swagger
+import io
 
 # Inicialización de componentes globales
 app = Flask(__name__)
 
-app.config['SWAGGER'] = {
-    'title': 'API Telemetría SIGEFVE',
-    'uiversion': 3,
-    'version': '1.0.0',
-    'description': 'Microservicio de análisis de rendimiento y gestión de alertas para vehículos eléctricos.'
+app.config["SWAGGER"] = {
+    "title": "API Telemetría SIGEFVE",
+    "uiversion": 3,
+    "version": "1.0.0",
+    "description": "Microservicio de análisis de rendimiento y gestión de alertas para vehículos eléctricos.",
 }
 swagger = Swagger(app)
 
@@ -21,6 +24,7 @@ swagger = Swagger(app)
 analizador = AnalizadorRendimiento()
 gestor_eventos = GestorEventos()
 observador = ObservadorTelemetria(gestor_eventos)
+
 
 class ServicioPython:
     """
@@ -33,7 +37,7 @@ class ServicioPython:
         """
         gestor_eventos.iniciar_hilo()
 
-        @app.route('/health', methods=['GET'])
+        @app.route("/health", methods=["GET"])
         def health_check():
             """
             Verifica la disponibilidad del microservicio.
@@ -55,17 +59,13 @@ class ServicioPython:
             """
             return jsonify({"status": "OK", "servicio": "python-service"}), 200
 
-        @app.route('/telemetria', methods=['POST'])
+        @app.route("/telemetria", methods=["POST"])
         def recibir_telemetria():
             """
             Punto de entrada para la ingesta de datos de telemetría.
-            
+
             Recibe paquetes de datos (nivel de batería, ubicación GPS, temperatura)
             y los delega al ObservadorTelemetria.
-
-            Parámetros (Payload):
-                telemetria (dict): Datos de sensores.
-            
             ---
             tags:
               - Telemetría
@@ -83,23 +83,30 @@ class ServicioPython:
                     id_vehiculo:
                       type: integer
                       example: 1
-                    bateria:
-                      type: integer
-                      example: 85
-                    temperatura:
+                    nivel_bateria:
                       type: number
-                      example: 65.5
-                    latitud:
+                      example: 85.00
+                    temperatura_motor:
                       type: number
-                      example: 19.4326
-                    longitud:
+                      example: 65.50
+                    kilometros_totales:
                       type: number
-                      example: -99.1332
+                      example: 19.43
             responses:
               200:
-                description: Telemetría recibida correctamente
+                description: Telemetría procesada
+                schema:
+                  type: object
+                  properties:
+                    mensaje:
+                      type: string
               500:
-                description: Error de procesamiento
+                description: Error en el servidor
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
             """
             try:
                 telemetria = request.json
@@ -107,29 +114,61 @@ class ServicioPython:
                 return jsonify({"mensaje": "Telemetría procesada"}), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
-            
+
         def _formatear_alertas(alertas):
-            """Formatea tuplas de BD a diccionarios JSON."""
+            """
+            Formatea las alertas de la base de datos a un formato JSON amigable.
+            Parámetros:
+              alertas: Lista de tuplas con datos de alertas
+            Returns:
+              Lista de diccionarios con alertas formateadas
+            """
             resultado = []
+
             for alerta in alertas:
-                resultado.append({
-                    'id': alerta[0],
-                    'tipo': alerta[1],
-                    'descripcion': alerta[2],
-                    'prioridad': alerta[3],
-                    'fecha_generacion': alerta[4],
-                    'estado': alerta[5],
-                    'vehiculo_id': alerta[6]
-                })
+                # alerta = (id, descripcion, prioridad, fecha_generacion, estado, id_vehiculo, mensaje, mantenimiento)
+                alerta_dict = {
+                    "id": alerta[0],
+                    "descripcion": alerta[1],
+                    "prioridad": alerta[2],
+                    "fecha_generacion": alerta[3],
+                    "id_vehiculo": alerta[5],
+                }
+
+                # Determinar el tipo de alerta basado en los datos adicionales
+                # Nota: Verifica los índices dependiendo de tu Query SQL.
+                # En tu query original indices: 6 -> mensaje (urgente), 7 -> mantenimiento
+                if len(alerta) > 6 and alerta[6] is not None:
+                    alerta_dict["tipo"] = "urgente"
+                    alerta_dict["mensaje"] = alerta[6]
+                elif len(alerta) > 7 and alerta[7] is not None:
+                    alerta_dict["tipo"] = "mantenimiento"
+                    alerta_dict["mantenimiento"] = alerta[7]
+                else:
+                    alerta_dict["tipo"] = "general"
+
+                resultado.append(alerta_dict)
+
             return resultado
 
-        @app.route('/alertas', methods=['GET'])
+        @app.route("/alertas", methods=["GET"])
         def listar_alertas():
             """
             Recupera todas las alertas activas del sistema.
             ---
             tags:
               - Alertas
+            parameters:
+              - name: prioridad
+                in: query
+                type: integer
+                required: false
+                description: Filtrar por prioridad específica
+              - name: id_vehiculo
+                in: query
+                type: integer
+                required: false
+                description: Filtrar por vehículo específico
             responses:
               200:
                 description: Lista de alertas activas
@@ -143,132 +182,215 @@ class ServicioPython:
                         properties:
                           id:
                             type: integer
-                          tipo:
+                          descripcion:
                             type: string
                           prioridad:
                             type: integer
+                          fecha_generacion:
+                            type: string
+                          id_vehiculo:
+                            type: integer
+                          tipo:
+                            type: string
+                          mantenimiento:
+                            type: string
+                          mensaje:
+                            type: string
+              500:
+                description: Error en el servidor
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
             """
             try:
                 conn = Config.obtener_conexion()
                 cursor = conn.cursor()
-                cursor.execute(
-                    'SELECT * FROM alertas WHERE estado = true ORDER BY prioridad ASC, fecha_generacion DESC')
+
+                prioridad_filtro = request.args.get("prioridad", type=int)
+                vehiculo_filtro = request.args.get("id_vehiculo", type=int)
+
+                query = """
+                        SELECT 
+                                a.id,
+                                a.descripcion,
+                                a.prioridad,
+                                a.fecha_generacion,
+                                a.estado,
+                                a.id_vehiculo,
+                                au.mensaje,
+                                am.mantenimiento
+                        FROM alerta a
+                        LEFT JOIN alerta_urgente au ON a.id = au.id_alerta
+                        LEFT JOIN alerta_mantenimiento am ON a.id = am.id_alerta
+                        WHERE a.estado = 1
+                        """
+
+                parametros = []
+
+                if prioridad_filtro is not None:
+                    query += " AND a.prioridad = ?"
+                    parametros.append(prioridad_filtro)
+
+                if vehiculo_filtro is not None:
+                    query += " AND a.id_vehiculo = ?"
+                    parametros.append(vehiculo_filtro)
+
+                query += " ORDER BY a.prioridad ASC, a.fecha_generacion DESC"
+
+                cursor.execute(query, parametros)
                 alertas = cursor.fetchall()
                 conn.close()
-                return jsonify({'alertas': _formatear_alertas(alertas)}), 200
+                return jsonify({"alertas": _formatear_alertas(alertas)}), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
-            
-        @app.route('/alertas/<int:id_vehiculo>', methods=['GET'])
-        def listar_alertas_por_vehiculo(id_vehiculo):
-            """
-            Consulta las incidencias activas por vehículo.
-            ---
-            tags:
-              - Alertas
-            parameters:
-              - name: id_vehiculo
-                in: path
-                type: integer
-                required: true
-                description: ID del vehículo a consultar
-            responses:
-              200:
-                description: Alertas filtradas por vehículo
-            """
-            try:
-                conn = Config.obtener_conexion()
-                cursor = conn.cursor()
-                cursor.execute(
-                    'SELECT * FROM alertas WHERE estado = true AND id_vehiculo = ' + str(id_vehiculo) + ' ORDER BY prioridad ASC, fecha_generacion DESC')
-                alertas = cursor.fetchall()
-                conn.close()
-                return jsonify({'alertas': _formatear_alertas(alertas)}), 200
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-            
-        @app.route('/alertas/desactivar', methods=['PATCH'])
+
+        @app.route("/alertas/desactivar", methods=["PATCH"])
         def desactivar_alertas():
             """
-            Realiza el cierre masivo de alertas.
-            ---
-            tags:
-              - Gestión de Alertas
-            responses:
-              200:
-                description: Todas las alertas han sido desactivadas
-            """
-            try:
-                conn = Config.obtener_conexion()
-                cursor = conn.cursor()
-                cursor.execute('UPDATE alertas SET estado = false')
-                conn.commit()
-                cursor.execute('SELECT * FROM alertas ORDER BY prioridad ASC, fecha_generacion DESC')
-                alertas = cursor.fetchall()
-                conn.close()
-                return jsonify({'alertas': _formatear_alertas(alertas)}), 200
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-            
-        @app.route('/alertas/<int:id_vehiculo>/desactivar', methods=['PATCH'])
-        def desactivar_alertas_por_vehiculo(id_vehiculo):
-            """
-            Cierra las alertas de un vehículo específico.
-            ---
-            tags:
-              - Gestión de Alertas
-            parameters:
-              - name: id_vehiculo
-                in: path
-                type: integer
-                required: true
-            responses:
-              200:
-                description: Alertas del vehículo desactivadas
-            """
-            try:
-                conn = Config.obtener_conexion()
-                cursor = conn.cursor()
-                cursor.execute('UPDATE alertas SET estado = false WHERE id_vehiculo = ' + str(id_vehiculo))
-                conn.commit()
-                cursor.execute(
-                    'SELECT * FROM alertas WHERE id_vehiculo = ' + str(id_vehiculo) + ' ORDER BY prioridad ASC, fecha_generacion DESC')
-                alertas = cursor.fetchall()
-                conn.close()
-                return jsonify({'alertas': _formatear_alertas(alertas)}), 200
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-            
-        @app.route('/alertas/desactivar/id/<int:id>', methods=['PATCH'])
-        def desactivar_alertas_por_id(id):
-            """
-            Cierra una alerta individual por su ID.
+            Desactiva alertas del sistema de forma flexible.
+            Puede desactivar:
+            - Todas las alertas (sin parámetros)
+            - Alertas de un vehículo específico (?id_vehiculo=X)
+            - Una alerta específica (?id=X)
             ---
             tags:
               - Gestión de Alertas
             parameters:
               - name: id
-                in: path
+                in: query
                 type: integer
-                required: true
+                required: false
+                description: ID de la alerta específica a desactivar
+              - name: id_vehiculo
+                in: query
+                type: integer
+                required: false
+                description: ID del vehículo cuyas alertas se desactivarán
             responses:
               200:
-                description: Alerta desactivada
+                description: Alertas desactivadas correctamente
+                schema:
+                  type: object
+                  properties:
+                    mensaje:
+                      type: string
+                    alertas_desactivadas:
+                      type: integer
+                    alertas_actuales:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          descripcion:
+                            type: string
+                          prioridad:
+                            type: integer
+                          fecha_generacion:
+                            type: string
+                          id_vehiculo:
+                            type: integer
+                          tipo:
+                            type: string
+                          mantenimiento:
+                            type: string
+                          mensaje:
+                            type: string
+              404:
+                description: No se encontraron alertas activas para desactivar
+                schema:
+                  type: object
+                  properties:
+                    mensaje:
+                      type: string
+                    alertas_desactivadas:
+                      type: integer
+              500:
+                description: Error en el servidor
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
             """
             try:
                 conn = Config.obtener_conexion()
                 cursor = conn.cursor()
-                cursor.execute('UPDATE alertas SET estado = false WHERE id = ' + str(id))
+
+                id_alerta = request.args.get("id", type=int)
+                id_vehiculo = request.args.get("id_vehiculo", type=int)
+
+                if id_alerta is not None:
+                    cursor.execute(
+                        "UPDATE alerta SET estado = 0 WHERE id = ?", (id_alerta,)
+                    )
+                    mensaje = f"Alerta {id_alerta} desactivada"
+
+                elif id_vehiculo is not None:
+                    cursor.execute(
+                        "UPDATE alerta SET estado = 0 WHERE id_vehiculo = ? AND estado = 1",
+                        (id_vehiculo,),
+                    )
+                    mensaje = f"Alertas del vehículo {id_vehiculo} desactivadas"
+
+                else:
+                    cursor.execute("UPDATE alerta SET estado = 0 WHERE estado = 1")
+                    mensaje = "Todas las alertas desactivadas"
+
+                alertas_desactivadas = cursor.rowcount
                 conn.commit()
-                cursor.execute(
-                    'SELECT * FROM alertas WHERE id = ' + str(id) + ' ORDER BY prioridad ASC, fecha_generacion DESC')
-                alertas = cursor.fetchall()
+
+                if alertas_desactivadas == 0:
+                    conn.close()
+                    return (
+                        jsonify(
+                            {
+                                "mensaje": "No se encontraron alertas activas para desactivar",
+                                "alertas_desactivadas": 0,
+                            }
+                        ),
+                        404,
+                    )
+
+                query_actual = """
+                        SELECT 
+                            a.id,
+                            a.descripcion,
+                            a.prioridad,
+                            a.fecha_generacion,
+                            a.estado,
+                            a.id_vehiculo,
+                            au.mensaje,
+                            am.mantenimiento
+                        FROM alerta a
+                        LEFT JOIN alerta_urgente au ON a.id = au.id_alerta
+                        LEFT JOIN alerta_mantenimiento am ON a.id = am.id_alerta
+                        WHERE a.estado = 1
+                        ORDER BY a.prioridad ASC, a.fecha_generacion DESC
+                    """
+
+                cursor.execute(query_actual)
+                alertas_activas = cursor.fetchall()
                 conn.close()
-                return jsonify({'alertas': _formatear_alertas(alertas)}), 200
+
+                return (
+                    jsonify(
+                        {
+                            "mensaje": mensaje,
+                            "alertas_desactivadas": alertas_desactivadas,
+                            "alertas_activas": _formatear_alertas(alertas_activas),
+                        }
+                    ),
+                    200,
+                )
+
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
-            
-        @app.route('/estadisticas', methods=['GET'])
+
+        @app.route("/estadisticas", methods=["GET"])
         def obtener_estadisticas():
             """
             Genera estadísticas globales de la flota.
@@ -278,19 +400,52 @@ class ServicioPython:
             responses:
               200:
                 description: Estadísticas agregadas
+                schema:
+                  type: object
+                  properties:
+                    estadisticas:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id_vehiculo:
+                            type: integer
+                          registros_procesados:
+                            type: integer
+                          kilometros_totales:
+                            type: number
+                          eficiencia_bateria:
+                            type: number
+                          entregas:
+                            type: integer
               404:
-                description: No hay datos suficientes
+                description: No se encontraron datos de vehículos
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+              500:
+                description: Error en el servidor
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
             """
             try:
                 resultado = analizador.analizar_vehiculos()
                 if resultado:
-                    return jsonify(resultado), 200
+                    return jsonify({ "estadisticas": resultado }), 200
                 else:
-                    return jsonify({"error": "No se encontraron datos de vehículos"}), 404
+                    return (
+                        jsonify({"error": "No se encontraron datos de vehículos"}),
+                        404,
+                    )
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
-        @app.route('/estadisticas/<int:id_vehiculo>', methods=['GET'])
+        @app.route("/estadisticas/<int:id_vehiculo>", methods=["GET"])
         def obtener_estadisticas_por_vechiulo(id_vehiculo):
             """
             Obtiene estadísticas de un vehículo.
@@ -305,6 +460,33 @@ class ServicioPython:
             responses:
               200:
                 description: Estadísticas del vehículo
+                schema:
+                  type: object
+                  properties:
+                    id_vehiculo:
+                      type: integer
+                    registros_procesados:
+                      type: integer
+                    kilometros_totales:
+                      type: number
+                    eficiencia_bateria:
+                      type: number
+                    entregas:
+                      type: integer
+              404:
+                description: No se encontraron datos para el vehículo
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+              500:
+                description: Error en el servidor
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
             """
             try:
                 if id_vehiculo:
@@ -312,14 +494,20 @@ class ServicioPython:
                     if resultado:
                         return jsonify(resultado), 200
                     else:
-                        return jsonify({"error": "No se encontraron datos para el vehículo"}), 404
+                        return (
+                            jsonify(
+                                {"error": "No se encontraron datos para el vehículo"}
+                            ),
+                            404,
+                        )
                 else:
+                    # Este bloque else es teóricamente inalcanzable por la ruta, pero se mantiene por seguridad
                     reporte = analizador.generar_reporte()
                     return jsonify(reporte), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
-        @app.route('/reporte/csv', methods=['GET'])
+        @app.route("/reporte/csv", methods=["GET"])
         def exportar_reporte_csv():
             """
             Exporta el reporte histórico a CSV (WIP).
@@ -336,20 +524,34 @@ class ServicioPython:
                       type: string
                     archivo:
                       type: string
+              500:
+                description: Error en el servidor
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
             """
             try:
-                ruta = analizador.exportar_csv()
-                return jsonify({"mensaje": "Reporte generado", "archivo": ruta}), 200
+                output = analizador.exportar_csv()
+
+                return send_file(
+                    io.BytesIO(output),
+                    mimetype="text/csv",
+                    as_attachment=True,
+                    download_name="reporte_rendimiento.csv",
+                )
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     try:
         servicio = ServicioPython()
         servicio.iniciar()
+        # Asegúrate de que el puerto sea entero, por si viene como string en Config
+        app.run(host=cf.FLASK_HOST, port=int(cf.FLASK_PORT))
 
-        app.run(host=cf.FLASK_HOST, port=cf.FLASK_PORT)
-        
     except KeyboardInterrupt:
         gestor_eventos.detener_hilo()
         print("\n[SIGEFVE] Apagado correcto del servicio Python (Graceful Shutdown)")

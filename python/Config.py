@@ -1,12 +1,16 @@
+# Config.py
+
 import sqlite3
+
 
 class Config:
     """Configuración básica del sistema"""
+
     # Base de datos SQLite
-    RUTA_DB = 'alertas.db'
+    RUTA_DB = "alertas.db"
 
     # Flask
-    FLASK_HOST = '0.0.0.0'
+    FLASK_HOST = "0.0.0.0"
     FLASK_PORT = 5001
 
     # Umbrales de alertas
@@ -28,29 +32,40 @@ def init_db():
     cursor = conn.cursor()
 
     # Tabla de alertas
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS alertas (
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS alerta (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tipo TEXT NOT NULL,
             descripcion TEXT NOT NULL,
             prioridad INTEGER NOT NULL,
             fecha_generacion TEXT NOT NULL,
             estado INTEGER NOT NULL,
             id_vehiculo INTEGER NOT NULL
         )
-    ''')
+    """
+    )
 
-    # Tabla de estadísticas
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS estadisticas (
+    # Tabla de alertas de mantenimiento
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS alerta_mantenimiento (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            id_vehiculo INTEGER NOT NULL,
-            kilometros_totales REAL DEFAULT 0,
-            eficiencia_bateria REAL DEFAULT 0,
-            entregas_completadas INTEGER DEFAULT 0,
-            ultima_actualizacion TEXT
+            id_alerta INTEGER NOT NULL,
+            mantenimiento DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """
+    )
+
+    # Tabla de alertas urgentes
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS alerta_urgente (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_alerta INTEGER NOT NULL,
+            mensaje TEXT NOT NULL
+        )
+    """
+    )
 
     conn.commit()
     conn.close()

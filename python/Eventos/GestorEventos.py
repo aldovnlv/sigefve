@@ -39,27 +39,30 @@ class GestorEventos(Thread):
         self._cola_eventos.put(evento)
 
     def procesar_evento(self, evento):
-        telemetria = evento.get('telemetria', {})
-        id_vehiculo = telemetria.get('id_vehiculo')
-        nivel_bateria = telemetria.get('nivel_bateria', 100)
-        temperatura = telemetria.get('temperatura_motor', 0)
-        kilometros_totales = telemetria.get('kilometros_totales', 0)
+        telemetria = evento.get("telemetria", {})
+        id_vehiculo = telemetria.get("id_vehiculo")
+        nivel_bateria = telemetria.get("nivel_bateria", 100)
+        temperatura = telemetria.get("temperatura_motor", 0)
+        kilometros_totales = telemetria.get("kilometros_totales", 0)
 
-        # Generar alertas según condiciones (usando umbrales configurables)
+        # Generar alertas según condiciones (usando umbrales)
         if nivel_bateria < Config.BATERIA_BAJA_UMBRAL:
-            alerta = AlertaUrgente("BATERIA_BAJA",
-                                   f"Vehículo {id_vehiculo}: Batería crítica ({nivel_bateria}%)",
-                                   1, id_vehiculo, estado=True)
+            alerta = AlertaUrgente(
+                id_vehiculo,
+                f"Vehículo {id_vehiculo}: Batería crítica ({nivel_bateria}%)",
+                1,
+            )
             alerta.notificar_inmediatamente()
 
         if temperatura > Config.TEMPERATURA_ALTA_UMBRAL:
-            alerta = AlertaUrgente("TEMPERATURA_ALTA",
-                                   f"Vehículo {id_vehiculo}: Temperatura del motor alta ({temperatura}°C)",
-                                   1, id_vehiculo, estado=True)
+            alerta = AlertaUrgente(
+                id_vehiculo,
+                f"Vehículo {id_vehiculo}: Temperatura del motor alta ({temperatura}°C)",
+                2,
+            )
             alerta.notificar_inmediatamente()
 
-        mantenimiento = AlertaMantenimiento(f"Vehículo {id_vehiculo}: Mantenimiento por kilometraje: {kilometros_totales} km",
-                                   1, id_vehiculo, kilometros_totales)
+        mantenimiento = AlertaMantenimiento(id_vehiculo, kilometros_totales)
         mantenimiento.verificar_kilometraje()
 
     def _procesar_cola(self):
