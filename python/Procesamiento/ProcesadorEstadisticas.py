@@ -7,9 +7,9 @@ class ProcesadorEstadisticas(ABC):
     Clase abstracta para procesamiento genérico de datos de rendimiento.
     """
     @abstractmethod
-    def procesar_datos(self, telemetria):
+    def procesar_datos(self, id_vehiculo):
         pass
 
     @abstractmethod
-    def generar_reporte(self):
+    def exportar_csv(self):
         pass
