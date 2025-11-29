@@ -19,14 +19,10 @@ services:
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
         apt -y update
         apt install -y apache2
-        : apt install -y cron git apache2 iproute2 php php-{curl,zip,mysqli,xml,mbstring,gd,intl,soap}
-        : sed -i 's/^;max_input_vars *= *1000/max_input_vars = 5000/' /etc/php/8.2/apache2/php.ini
-        : echo apache max_input_vars = 5000
-        : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
         service apache2 start
         tail -F keep.alive
     volumes:
-        - ${SIGEFVE_BIND_BASE_PATH}/web-app:/var/www/html
+      - ${SIGEFVE_BIND_BASE_PATH}/web-app:/var/www/html
 
   sigefve_python:
     hostname: sigefve_python
@@ -43,10 +39,6 @@ services:
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
         apt -y update
         apt install -y python3 python3-pip python3-venv
-        : apt install -y cron git apache2 iproute2 php php-{curl,zip,mysqli,xml,mbstring,gd,intl,soap}
-        : sed -i 's/^;max_input_vars *= *1000/max_input_vars = 5000/' /etc/php/8.2/apache2/php.ini
-        : echo apache max_input_vars = 5000
-        : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
         pwd
         which python3
         which pip3
@@ -57,43 +49,63 @@ services:
         python3 app.py
         tail -F keep.alive
     volumes:
-        - ${SIGEFVE_BIND_BASE_PATH}/python:/python
+      - ${SIGEFVE_BIND_BASE_PATH}/python:/python
 
-        
   sigefve_java:
     hostname: sigefve_java
     container_name: sigefve_java
     image: debian:12.1
-    #ports:
-    #  - "${SIGEFVE_WEB_PORT}:80"
+    environment:
+      - DB_URL:jdbc:postgresql://postgresql_java:5432/sigefve
+      - DB_USER:data
+      - DB_PASSWORD:data
+    ports:
+      - "${JAVA_PORT}:8585"
     restart: unless-stopped
+    depends_on:
+      - postgresql_java
     command:
       - /bin/bash
       - -c
       - |
         export DEBIAN_FRONTEND=noninteractive
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
-        apt -y update
-        apt install -y default-jdk
-        : apt install -y cron git apache2 iproute2 php php-{curl,zip,mysqli,xml,mbstring,gd,intl,soap}
-        : sed -i 's/^;max_input_vars *= *1000/max_input_vars = 5000/' /etc/php/8.2/apache2/php.ini
-        : echo apache max_input_vars = 5000
-        : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
-        pwd
-        which javac
-        javac -d /java/dist /java/Sigefve.java
-        cd /java/dist
-        java Sigefve
+        apt -y update > /dev/null 2>&1
+        apt install -y default-jdk > /dev/null 2>&1
+        java -version
+        date
+        cd /root/java
+
+        echo version 0.2
+        javac -d out -cp .:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com/sigefve/ServidorHTTP.java
+        javac -d out -cp .:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com/sigefve/utils/InicializadorDatos.java
+        java -cp .:out:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com.sigefve.ServidorHTTP
+        : java -cp .:out:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com.sigefve.utils.InicializadorDatos
+
         tail -F keep.alive
     volumes:
-        - ${SIGEFVE_BIND_BASE_PATH}/java:/java
+      - ${SIGEFVE_BIND_BASE_PATH}/java:/root/java
+
+  postgresql_java:
+    hostname: postgresql_java
+    container_name: postgresql_java
+    image: postgres:14-alpine
+    restart: unless-stopped
+    ports:
+      - 54302:5432
+    volumes:
+      - ${SIGEFVE_BIND_BASE_PATH}/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=sigefve
 
   sigefve_go:
     hostname: sigefve_go
     container_name: sigefve_go
     image: debian:12.1
     ports:
-     - "${SIGEFVE_GO_PORT}:8080"
+      - "${SIGEFVE_GO_PORT}:8080"
     restart: unless-stopped
     # environment:
     #   - PATH=/usr/local/go/bin:PATH
@@ -115,4 +127,4 @@ services:
         go run main.go
         tail -F keep.alive
     volumes:
-        - ${SIGEFVE_BIND_BASE_PATH}/go:/go
+      - ${SIGEFVE_BIND_BASE_PATH}/go:/go

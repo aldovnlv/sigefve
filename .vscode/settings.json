@@ -1,0 +1,8 @@
+{
+  "java.project.referencedLibraries": [
+    "lib/**/*.jar",
+    "java/jar/postgresql-42.7.8.jar",
+    "java/jar/gson-2.11.0.jar"
+  ],
+  "java.dependency.packagePresentation": "hierarchical"
+}
