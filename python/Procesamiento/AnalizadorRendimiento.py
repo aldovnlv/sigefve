@@ -120,7 +120,7 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
     def _calcular_eficiencia_bateria(self, telemetrias):
         baterias = [telemetria.get("nivelBateria", 0) for telemetria in telemetrias]
 
-        return sum(baterias) / len(baterias)
+        return round(sum(baterias) / len(baterias), 2)
 
     def _calcular_entregas(self, telemetrias):
         entregas = [telemetria.get("entregasCompletadas", 0) for telemetria in telemetrias]
