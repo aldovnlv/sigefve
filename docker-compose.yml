@@ -1,5 +1,5 @@
 # '''
-# Define las variables de entorno SIGEFVE_BIND_BASE_PATH y SIGEFVE_WEB_PORT en tu sistema para poder iniciar el proyecto.
+# Define las variables de entorno SIGEFVE_BIND_BASE_PATH y SIGEFVE_WEB_PORT para poder iniciar el proyecto.
 # SIGEFVE_BIND_BASE_PATH = ruta a la carpeta donde se clona el proyecto.
 # SIGEFVE_WEB_PORT = puerto para el servidor web.
 # '''
@@ -26,11 +26,42 @@ services:
         service apache2 start
         tail -F keep.alive
     volumes:
-        - ${SIGEFVE_BIND_BASE_PATH}/web-app:/var/www/html
-        
+      - ${SIGEFVE_BIND_BASE_PATH}/web-app:/var/www/html
+
+  sigefve_python:
+    hostname: sigefve_python
+    container_name: sigefve_python
+    image: debian:12.1
+    ports:
+      - "8822:5001"
+    restart: unless-stopped
+    command:
+      - /bin/bash
+      - -c
+      - |
+        export DEBIAN_FRONTEND=noninteractive
+        ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
+        apt -y update
+        apt install -y python3 python3-pip python3-venv
+        : apt install -y cron git apache2 iproute2 php php-{curl,zip,mysqli,xml,mbstring,gd,intl,soap}
+        : sed -i 's/^;max_input_vars *= *1000/max_input_vars = 5000/' /etc/php/8.2/apache2/php.ini
+        : echo apache max_input_vars = 5000
+        : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
+        pwd
+        which python3
+        which pip3
+        cd /python
+        python3 -m venv python/venv
+        source python/venv/bin/activate
+        pip3 install flask flasgger requests
+        python3 app.py
+        tail -F keep.alive
+    volumes:
+      - ${SIGEFVE_BIND_BASE_PATH}/python:/python
+
   sigefve_java:
-    hostname: sigefve_java
-    container_name: sigefve_java
+    hostname: java-sigefve_module
+    container_name: java-sigefve_module
     image: debian:12.1
     environment:
       - DB_URL:jdbc:postgresql://postgresql_java:5432/sigefve
@@ -61,7 +92,7 @@ services:
 
         tail -F keep.alive
     volumes:
-      - ${SIGEFVE_VOLUMES}/java:/root/java
+      - ${SIGEFVE_BIND_BASE_PATH}/java:/root/java
 
   postgresql_java:
     hostname: postgresql_java
@@ -71,8 +102,37 @@ services:
     ports:
       - 54302:5432
     volumes:
-      - ${PERSISTENCIA_SIGEFVE}/apps/postgres:/var/lib/postgresql/data
+      - ${SIGEFVE_BIND_BASE_PATH}/apps/postgres:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=sigefve
+
+  sigefve_go:
+    hostname: sigefve_go
+    container_name: sigefve_go
+    image: debian:12.1
+    ports:
+      - "${SIGEFVE_GO_PORT}:8080"
+    restart: unless-stopped
+    # environment:
+    #   - PATH=/usr/local/go/bin:PATH
+    command:
+      - /bin/bash
+      - -c
+      - |
+        export DEBIAN_FRONTEND=noninteractive
+        ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
+        apt -y update
+        apt install -y wget locate
+        wget https://go.dev/dl/go1.25.4.linux-amd64.tar.gz
+        rm -rf /usr/local/go && tar -C /usr/local -xzf go1.25.4.linux-amd64.tar.gz
+        export PATH=/usr/local/go/bin:$$PATH
+        pwd
+        updatedb
+        locate router.go
+        cd go
+        go run main.go
+        tail -F keep.alive
+    volumes:
+      - ${SIGEFVE_BIND_BASE_PATH}/go:/go
