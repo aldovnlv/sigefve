@@ -1,7 +1,5 @@
 # Procesamiento/AnalizadorRendimiento.py
 
-from datetime import datetime
-import Config
 from Config import Config as cf
 import csv
 import io
@@ -16,44 +14,44 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
     def __init__(self):
         self._datos_vehiculos = {}
 
-    def obtener_vehiculos_java(self):
+    def _obtener_vehiculos_java(self):
         """Obtiene todos los vehículos desde el microservicio Java"""
         try:
             url = f"{cf.JAVA_URL}/vehiculos"
-            response = requests.get(url, timeout=5)
+            respuesta = requests.get(url, timeout=5)
 
-            if response.status_code == 200:
-                return response.json()
+            if respuesta.status_code == 200:
+                return respuesta.json()
             else:
-                print(f"[ERROR] Error al obtener vehículos: {response.status_code}")
+                print(f"[ERROR] Error al obtener vehículos: {respuesta.status_code}")
                 return []
         except requests.exceptions.RequestException as e:
             print(f"[ERROR] No se pudo conectar con Java service: {e}")
             return []
 
-    def obtener_telemetria_java(self, id_vehiculo):
+    def _obtener_telemetria_java(self, id_vehiculo):
         """Obtiene datos de telemetría desde el microservicio Java"""
         try:
             url = f"{cf.JAVA_URL}/telemetria/vehiculo/{id_vehiculo}"
-            response = requests.get(url, timeout=5)
+            respuesta = requests.get(url, timeout=5)
 
-            if response.status_code == 200:
-                return response.json()
+            if respuesta.status_code == 200:
+                return respuesta.json()
             else:
                 print(
-                    f"[ERROR] Error al obtener telemetría del vehículo {id_vehiculo}: {response.status_code}"
+                    f"[ERROR] Error al obtener telemetría del vehículo {id_vehiculo}: {respuesta.status_code}"
                 )
                 return []
         except requests.exceptions.RequestException as e:
             print(f"[ERROR] No se pudo conectar con Java service: {e}")
             return []
 
-    def analizar_vehiculo(self, id_vehiculo):
+    def _analizar_vehiculo(self, id_vehiculo):
         """Analiza todo el historial de telemetría de un vehículo desde Java"""
         print(f"[ANALISIS] Obteniendo telemetría del vehículo {id_vehiculo}...")
 
         # Obtener datos desde Java
-        telemetrias = self.obtener_telemetria_java(id_vehiculo)
+        telemetrias = self._obtener_telemetria_java(id_vehiculo)
 
         if not telemetrias:
             print(f"[ANALISIS] No hay datos para el vehículo {id_vehiculo}")
@@ -98,11 +96,11 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
             "entregas": self._datos_vehiculos[id_vehiculo]["entregas"],
         }
 
-    def analizar_vehiculos(self):
+    def _analizar_vehiculos(self):
         """Analiza todo el historial de telemetría de todos los vehículos desde Java"""
         print("[ANALISIS] Obteniendo lista de vehículos...")
 
-        vehiculos = self.obtener_vehiculos_java()
+        vehiculos = self._obtener_vehiculos_java()
 
         if not vehiculos:
             print("[ANALISIS] No se encontraron vehículos")
@@ -118,7 +116,7 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
             if id_vehiculo:
                 print(f"[ANALISIS] Analizando vehículo ID: {id_vehiculo}")
 
-                resultado = self.analizar_vehiculo(id_vehiculo)
+                resultado = self._analizar_vehiculo(id_vehiculo)
 
                 if resultado:
                     resultados.append(resultado)
@@ -162,8 +160,11 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
     def calcular_entregas(self, id_vehiculo):
         return self._datos_vehiculos.get(id_vehiculo, {}).get("entregas", 0)
 
-    def generar_reporte(self):
-        return self._datos_vehiculos
+    def generar_reporte(self, id_vehiculo = -1):
+        if id_vehiculo != -1 :
+            return self._analizar_vehiculo(id_vehiculo)
+        
+        return self._analizar_vehiculos()
 
     def exportar_csv(self, ruta="reporte_rendimiento.csv"):
         try:
