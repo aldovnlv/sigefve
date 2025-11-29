@@ -409,18 +409,18 @@ class ServicioPython:
                           registros_procesados: 150
                           kilometros_totales: 1250.5
                           eficiencia_bateria: 95.3
-                          entregas: 45
+                          entregas_completadas: 45
                         - id_vehiculo: 2
                           registros_procesados: 200
                           kilometros_totales: 1800.2
                           eficiencia_bateria: 92.1
-                          entregas: 60
+                          entregas_completadas: 60
                     vehículo específico:
                       id_vehiculo: 1
                       registros_procesados: 150
                       kilometros_totales: 1250.5
                       eficiencia_bateria: 95.3
-                      entregas: 45
+                      entregas_completadas: 45
                 schema:
                   type: object
               404:
@@ -443,7 +443,7 @@ class ServicioPython:
 
                 if id_vehiculo:
                     # Lógica para vehículo específico
-                    resultado = analizador.generar_reporte(id_vehiculo=id_vehiculo)
+                    resultado = analizador.procesar_datos(id_vehiculo=id_vehiculo)
                     if resultado:
                         return jsonify(resultado), 200
                     else:
@@ -455,7 +455,7 @@ class ServicioPython:
                         )
                 else:
                     # Lógica global
-                    resultado = analizador.generar_reporte()
+                    resultado = analizador.procesar_datos()
                     if resultado:
                         return jsonify({"estadisticas": resultado}), 200
                     else:

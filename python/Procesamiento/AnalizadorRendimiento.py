@@ -11,9 +11,6 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
     Clase utilizada para el análisis de rendimiento del vehículo.
     """
 
-    def __init__(self):
-        self._datos_vehiculos = {}
-
     def _obtener_vehiculos_java(self):
         """Obtiene todos los vehículos desde el microservicio Java"""
         try:
@@ -45,6 +42,26 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
         except requests.exceptions.RequestException as e:
             print(f"[ERROR] No se pudo conectar con Java service: {e}")
             return []
+        
+    def _calcular_estadisticas_telemetria(self, telemetrias):
+        """
+        Calcula estadísticas a partir de un conjunto de datos de telemetría.
+        Retorna un diccionario con las métricas calculadas.
+        """
+        if not telemetrias:
+            return {
+                "kilometros_totales": 0,
+                "eficiencia_bateria": 100.0,
+                "entregas_completadas": 0,
+                "registros_procesados": 0
+            }
+
+        return {
+            "kilometros_totales": self._calcular_kilometros(telemetrias),
+            "eficiencia_bateria": self._calcular_eficiencia_bateria(telemetrias),
+            "entregas_completadas": self._calcular_entregas(telemetrias),
+            "registros_procesados": len(telemetrias)
+        }
 
     def _analizar_vehiculo(self, id_vehiculo):
         """Analiza todo el historial de telemetría de un vehículo desde Java"""
@@ -59,42 +76,10 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
 
         print(f"[ANALISIS] Procesando {len(telemetrias)} registros de telemetría...")
 
-        # Inicializar datos del vehículo si no existen
-        if id_vehiculo not in self._datos_vehiculos:
-            self._datos_vehiculos[id_vehiculo] = {
-                "kilometros": 0,
-                "consumo_bateria": [],
-                "entregas": 0,
-                "ultimo_kilometraje": 0,
-            }
+        estadisticas = self._calcular_estadisticas_telemetria(telemetrias)
+        estadisticas["id_vehiculo"] = id_vehiculo
 
-        # Procesar todos los registros
-        kilometrajes = []
-        baterias = []
-
-        for telemetria in telemetrias:
-            # Recolectar datos
-            km = telemetria.get("kilometrajeActual", 0)
-            bat = telemetria.get("nivelBateria", 0)
-
-            kilometrajes.append(km)
-
-            baterias.append(bat)
-
-        # Calcular estadísticas
-        if kilometrajes:
-            self._datos_vehiculos[id_vehiculo]["kilometros"] = max(kilometrajes)
-
-        if baterias:
-            self._datos_vehiculos[id_vehiculo]["consumo_bateria"] = baterias
-
-        return {
-            "id_vehiculo": id_vehiculo,
-            "registros_procesados": len(telemetrias),
-            "kilometros_totales": self._datos_vehiculos[id_vehiculo]["kilometros"],
-            "eficiencia_bateria": self.calcular_eficiencia_bateria(id_vehiculo),
-            "entregas": self._datos_vehiculos[id_vehiculo]["entregas"],
-        }
+        return estadisticas
 
     def _analizar_vehiculos(self):
         """Analiza todo el historial de telemetría de todos los vehículos desde Java"""
@@ -127,46 +112,28 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
 
         return resultados
 
-    def procesar_datos(self, telemetria):
-        id_vehiculo = telemetria.get("id_vehiculo")
+    def _calcular_kilometros(self, telemetrias):
+        kilometros = [telemetria.get("kilometrajeActual", 0) for telemetria in telemetrias]
 
-        if id_vehiculo not in self._datos_vehiculos:
-            self._datos_vehiculos[id_vehiculo] = {
-                "kilometros": 0,
-                "consumo_bateria": [],
-                "entregas": 0,
-            }
+        return max(kilometros) if kilometros else 0
 
-        # Simular cálculo de kilómetros (basado en velocidad)
-        velocidad = telemetria.get("velocidad", 0)
-        self._datos_vehiculos[id_vehiculo]["kilometros"] += velocidad * (
-            15 / 3600
-        )  # 15 seg a horas
+    def _calcular_eficiencia_bateria(self, telemetrias):
+        baterias = [telemetria.get("nivelBateria", 0) for telemetria in telemetrias]
 
-        # Registrar consumo de batería
-        bateria = telemetria.get("nivel_bateria", 100)
-        self._datos_vehiculos[id_vehiculo]["consumo_bateria"].append(bateria)
+        return sum(baterias) / len(baterias)
 
-    def calcular_kilometros(self, id_vehiculo):
-        return self._datos_vehiculos.get(id_vehiculo, {}).get("kilometros", 0)
+    def _calcular_entregas(self, telemetrias):
+        entregas = [telemetria.get("entregasCompletadas", 0) for telemetria in telemetrias]
 
-    def calcular_eficiencia_bateria(self, id_vehiculo):
-        consumos = self._datos_vehiculos.get(id_vehiculo, {}).get("consumo_bateria", [])
-        if len(consumos) < 2:
-            return 100.0
-        # Eficiencia = promedio de batería restante
-        return sum(consumos) / len(consumos)
+        return max(entregas) if entregas else 0
 
-    def calcular_entregas(self, id_vehiculo):
-        return self._datos_vehiculos.get(id_vehiculo, {}).get("entregas", 0)
-
-    def generar_reporte(self, id_vehiculo = -1):
+    def procesar_datos(self, id_vehiculo = -1):
         if id_vehiculo != -1 :
             return self._analizar_vehiculo(id_vehiculo)
         
         return self._analizar_vehiculos()
 
-    def exportar_csv(self, ruta="reporte_rendimiento.csv"):
+    def exportar_csv(self):
         try:
             # Generar CSV en memoria
             output = io.StringIO()
@@ -175,10 +142,11 @@ class AnalizadorRendimiento(ProcesadorEstadisticas):
                 ["Vehiculo ID", "Kilometros", "Eficiencia Bateria (%)", "Entregas"]
             )
 
-            for id_vehiculo, datos in self._datos_vehiculos.items():
-                eficiencia = self.calcular_eficiencia_bateria(id_vehiculo)
+            estadisticas = self._analizar_vehiculos()
+
+            for datos in estadisticas:
                 escritor.writerow(
-                    [id_vehiculo, datos["kilometros"], eficiencia, datos["entregas"]]
+                    [datos["id_vehiculo"], datos["kilometros_totales"], datos["eficiencia_bateria"], datos["entregas_completadas"]]
                 )
 
             output.seek(0)
