@@ -1,5 +1,3 @@
-# app.py
-
 import Config
 from Config import Config as cf
 from Eventos.GestorEventos import GestorEventos
@@ -137,7 +135,6 @@ class ServicioPython:
 
                 # Determinar el tipo de alerta basado en los datos adicionales
                 # Nota: Verifica los índices dependiendo de tu Query SQL.
-                # En tu query original indices: 6 -> mensaje (urgente), 7 -> mantenimiento
                 if len(alerta) > 6 and alerta[6] is not None:
                     alerta_dict["tipo"] = "urgente"
                     alerta_dict["mensaje"] = alerta[6]
@@ -393,88 +390,48 @@ class ServicioPython:
         @app.route("/estadisticas", methods=["GET"])
         def obtener_estadisticas():
             """
-            Genera estadísticas globales de la flota.
-            ---
-            tags:
-              - Reportes
-            responses:
-              200:
-                description: Estadísticas agregadas
-                schema:
-                  type: object
-                  properties:
-                    estadisticas:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id_vehiculo:
-                            type: integer
-                          registros_procesados:
-                            type: integer
-                          kilometros_totales:
-                            type: number
-                          eficiencia_bateria:
-                            type: number
-                          entregas:
-                            type: integer
-              404:
-                description: No se encontraron datos de vehículos
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-              500:
-                description: Error en el servidor
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-            """
-            try:
-                resultado = analizador.analizar_vehiculos()
-                if resultado:
-                    return jsonify({ "estadisticas": resultado }), 200
-                else:
-                    return (
-                        jsonify({"error": "No se encontraron datos de vehículos"}),
-                        404,
-                    )
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-
-        @app.route("/estadisticas/<int:id_vehiculo>", methods=["GET"])
-        def obtener_estadisticas_por_vechiulo(id_vehiculo):
-            """
-            Obtiene estadísticas de un vehículo.
+            Genera estadísticas de la flota.
+            Si se proporciona 'id_vehiculo', devuelve estadísticas específicas.
+            Si no, devuelve las estadísticas globales agregadas.
             ---
             tags:
               - Reportes
             parameters:
               - name: id_vehiculo
-                in: path
+                in: query
                 type: integer
-                required: true
+                required: false
+                description: ID del vehículo para estadísticas específicas
             responses:
               200:
-                description: Estadísticas del vehículo
+                description: |
+                  Estadísticas exitosas. Puede devolver:
+                  - Sin id_vehiculo: estadísticas globales de todos los vehículos
+                  - Con id_vehiculo: estadísticas de un vehículo específico
+                examples:
+                  application/json:
+                    estadisticas globales:
+                      estadisticas:
+                        - id_vehiculo: 1
+                          registros_procesados: 150
+                          kilometros_totales: 1250.5
+                          eficiencia_bateria: 95.3
+                          entregas: 45
+                        - id_vehiculo: 2
+                          registros_procesados: 200
+                          kilometros_totales: 1800.2
+                          eficiencia_bateria: 92.1
+                          entregas: 60
+                    vehículo específico:
+                      id_vehiculo: 1
+                      registros_procesados: 150
+                      kilometros_totales: 1250.5
+                      eficiencia_bateria: 95.3
+                      entregas: 45
                 schema:
                   type: object
-                  properties:
-                    id_vehiculo:
-                      type: integer
-                    registros_procesados:
-                      type: integer
-                    kilometros_totales:
-                      type: number
-                    eficiencia_bateria:
-                      type: number
-                    entregas:
-                      type: integer
               404:
-                description: No se encontraron datos para el vehículo
+                description: No se encontraron datos
                 schema:
                   type: object
                   properties:
@@ -489,28 +446,38 @@ class ServicioPython:
                       type: string
             """
             try:
+                id_vehiculo = request.args.get("id_vehiculo", type=int)
+
                 if id_vehiculo:
-                    resultado = analizador.analizar_vehiculo(int(id_vehiculo))
+                    # Lógica para vehículo específico
+                    resultado = analizador.analizar_vehiculo(id_vehiculo)
                     if resultado:
                         return jsonify(resultado), 200
                     else:
                         return (
                             jsonify(
-                                {"error": "No se encontraron datos para el vehículo"}
+                                {"error": f"No se encontraron datos para el vehículo {id_vehiculo}"}
                             ),
                             404,
                         )
                 else:
-                    # Este bloque else es teóricamente inalcanzable por la ruta, pero se mantiene por seguridad
-                    reporte = analizador.generar_reporte()
-                    return jsonify(reporte), 200
+                    # Lógica global
+                    resultado = analizador.analizar_vehiculos()
+                    if resultado:
+                        return jsonify({"estadisticas": resultado}), 200
+                    else:
+                        return (
+                            jsonify({"error": "No se encontraron datos de vehículos"}),
+                            404,
+                        )
+
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
         @app.route("/reporte/csv", methods=["GET"])
         def exportar_reporte_csv():
             """
-            Exporta el reporte histórico a CSV (WIP).
+            Exporta el reporte histórico a CSV.
             ---
             tags:
               - Reportes
