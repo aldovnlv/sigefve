@@ -69,9 +69,6 @@ class Alerta:
     def id_vehiculo(self, id_vehiculo):
         self._id_vehiculo = id_vehiculo
 
-    def activar(self):
-        self._estado = True
-
     def guardar(self):
         conn = Config.obtener_conexion()
         cursor = conn.cursor()

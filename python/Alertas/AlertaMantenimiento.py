@@ -25,7 +25,6 @@ class AlertaMantenimiento(Alerta, Notificable, Registrable):
         )
 
         if mantenimiento:
-            self.activar()
             self.enviar_notificacion()
             self.registrar_evento()
 
