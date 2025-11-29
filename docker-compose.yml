@@ -19,10 +19,6 @@ services:
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
         apt -y update
         apt install -y apache2
-        : apt install -y cron git apache2 iproute2 php php-{curl,zip,mysqli,xml,mbstring,gd,intl,soap}
-        : sed -i 's/^;max_input_vars *= *1000/max_input_vars = 5000/' /etc/php/8.2/apache2/php.ini
-        : echo apache max_input_vars = 5000
-        : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
         service apache2 start
         tail -F keep.alive
     volumes:
@@ -43,10 +39,6 @@ services:
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
         apt -y update
         apt install -y python3 python3-pip python3-venv
-        : apt install -y cron git apache2 iproute2 php php-{curl,zip,mysqli,xml,mbstring,gd,intl,soap}
-        : sed -i 's/^;max_input_vars *= *1000/max_input_vars = 5000/' /etc/php/8.2/apache2/php.ini
-        : echo apache max_input_vars = 5000
-        : echo "max_input_vars = 5000" |  tee -a "$(php --ini | grep 'Loaded Configuration File' | awk '{print $4}')"
         pwd
         which python3
         which pip3
