@@ -542,7 +542,7 @@ class SimuladorTelemetria implements Runnable {
 // CLASE PRINCIPAL DE PRUEBA
 // ============================================================================
 
-public class Sigefve {
+public class OldSigefve {
     public static void main(String[] args) {
         System.out.println("=== SISTEMA DE GESTIoN DE FLOTA DE VEHiCULOS ELeCTRICOS ===\n");
         
