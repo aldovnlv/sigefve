@@ -21,8 +21,8 @@ swagger = Swagger(app)
 # Instanciación de componentes de lógica de negocio
 analizador = AnalizadorRendimiento()
 gestor_eventos = GestorEventos()
-observador = ObservadorTelemetria(gestor_eventos)
-
+observador = ObservadorTelemetria()
+observador.suscribir(gestor_eventos)
 
 class ServicioPython:
     """
@@ -443,7 +443,7 @@ class ServicioPython:
 
                 if id_vehiculo:
                     # Lógica para vehículo específico
-                    resultado = analizador.analizar_vehiculo(id_vehiculo)
+                    resultado = analizador.generar_reporte(id_vehiculo=id_vehiculo)
                     if resultado:
                         return jsonify(resultado), 200
                     else:
@@ -455,7 +455,7 @@ class ServicioPython:
                         )
                 else:
                     # Lógica global
-                    resultado = analizador.analizar_vehiculos()
+                    resultado = analizador.generar_reporte()
                     if resultado:
                         return jsonify({"estadisticas": resultado}), 200
                     else:
@@ -513,5 +513,6 @@ if __name__ == "__main__":
         app.run(host=cf.FLASK_HOST, port=int(cf.FLASK_PORT))
 
     except KeyboardInterrupt:
+        observador.desuscribir(gestor_eventos)
         gestor_eventos.detener_hilo()
         print("\n[SIGEFVE] Apagado correcto del servicio Python (Graceful Shutdown)")

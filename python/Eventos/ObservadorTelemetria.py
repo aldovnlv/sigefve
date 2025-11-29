@@ -2,20 +2,18 @@
 
 from Eventos.GestorEventos import GestorEventos
 
-
 class ObservadorTelemetria:
     """
     Observador que recibe datos de telemetría desde el microservicio Java.
     """
 
-    def __init__(self, gestor = GestorEventos()):
+    def __init__(self):
         self._suscriptores = []
-        self._gestor = gestor
 
     def recibir_datos(self, telemetria):
         # Notificar al gestor para generar alertas
         evento = {'telemetria': telemetria}
-        self._gestor.actualizar(evento)
+        self.notificar_suscriptores(evento)
 
     def suscribir(self, gestor):
         if gestor not in self._suscriptores:
