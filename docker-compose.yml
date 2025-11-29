@@ -60,8 +60,8 @@ services:
       - ${SIGEFVE_BIND_BASE_PATH}/python:/python
 
   sigefve_java:
-    hostname: java-sigefve_module
-    container_name: java-sigefve_module
+    hostname: sigefve_java
+    container_name: sigefve_java
     image: debian:12.1
     environment:
       - DB_URL:jdbc:postgresql://postgresql_java:5432/sigefve
