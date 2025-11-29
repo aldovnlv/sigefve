@@ -36,7 +36,14 @@ class AlertaUrgente(Alerta, Notificable, Registrable):
         self.registrar_evento()
 
     def enviar_notificacion(self):
-        print(f"[NOTIFICACIÓN URGENTE] {self.descripcion}")
+        print(f"[NOTIFICACIÓN URGENTE] {self._mensaje}")
 
     def registrar_evento(self):
         self.guardar()
+
+    def to_dict(self):
+        """Convierte la alerta urgente a un diccionario serializable."""
+        base_dict = super().to_dict()
+        base_dict["tipo"] = "urgente"
+        base_dict["mensaje"] = self._mensaje
+        return base_dict
