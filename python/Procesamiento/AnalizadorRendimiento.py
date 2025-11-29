@@ -8,7 +8,6 @@ import io
 from .ProcesadorEstadisticas import ProcesadorEstadisticas
 import requests
 
-
 class AnalizadorRendimiento(ProcesadorEstadisticas):
     """
     Clase utilizada para el análisis de rendimiento del vehículo.

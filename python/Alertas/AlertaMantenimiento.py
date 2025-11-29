@@ -4,7 +4,7 @@ import Config
 from Abstractas.Notificable import Notificable
 from Abstractas.Registrable import Registrable
 from Alertas.Alerta import Alerta
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 class AlertaMantenimiento(Alerta, Notificable, Registrable):
@@ -20,7 +20,9 @@ class AlertaMantenimiento(Alerta, Notificable, Registrable):
         self._fecha_mantenimiento = self.fecha_generacion + timedelta(days=10)
 
     def verificar_kilometraje(self):
-        mantenimiento = self._kilometraje_actual >= Config.Config.KILOMETRAJE_MANTENIMIENTO
+        mantenimiento = (
+            self._kilometraje_actual >= Config.Config.KILOMETRAJE_MANTENIMIENTO
+        )
 
         if mantenimiento:
             self.activar()
@@ -46,7 +48,18 @@ class AlertaMantenimiento(Alerta, Notificable, Registrable):
         conn.close()
 
     def enviar_notificacion(self):
-        print(f"[NOTIFICACIÓN MANTENIMIENTO] {self.descripcion}")
+        print(f"[NOTIFICACIÓN MANTENIMIENTO] Mantenimiento en {self._fecha_mantenimiento}")
 
     def registrar_evento(self):
         self.guardar()
+
+    def to_dict(self):
+        """Convierte la alerta de mantenimiento a un diccionario serializable."""
+        base_dict = super().to_dict()
+        base_dict["tipo"] = "mantenimiento"
+        base_dict["mantenimiento"] = (
+            self._fecha_mantenimiento.isoformat()
+            if isinstance(self._fecha_mantenimiento, datetime)
+            else str(self._fecha_mantenimiento)
+        )
+        return base_dict

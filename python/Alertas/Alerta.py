@@ -3,11 +3,21 @@
 import Config
 import datetime
 
+
 class Alerta:
     """
     Clase base para las alertas generadas por el sistema.
     """
-    def __init__(self, descripcion, id_vehiculo, prioridad, id = -1, estado=True, fecha_generacion = datetime.datetime.now()):
+
+    def __init__(
+        self,
+        descripcion,
+        id_vehiculo,
+        prioridad,
+        id=-1,
+        estado=True,
+        fecha_generacion=datetime.datetime.now(),
+    ):
         self._id = id
         self._descripcion = descripcion
         self._prioridad = prioridad
@@ -22,7 +32,7 @@ class Alerta:
     @id.setter
     def id(self, id):
         self._id = id
-        
+
     @property
     def descripcion(self):
         return self._descripcion
@@ -62,18 +72,39 @@ class Alerta:
     def activar(self):
         self._estado = True
 
-    def desactivar(self):
-        self._estado = False
-
     def guardar(self):
         conn = Config.obtener_conexion()
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
                        INSERT INTO alerta (descripcion, prioridad, fecha_generacion, estado, id_vehiculo)
                        VALUES (?, ?, ?, ?, ?)
-                       ''', (self._descripcion, self._prioridad, self._fecha_generacion, self._estado,
-                             self._id_vehiculo))
+                       """,
+            (
+                self._descripcion,
+                self._prioridad,
+                self._fecha_generacion,
+                self._estado,
+                self._id_vehiculo,
+            ),
+        )
         self._id = cursor.lastrowid
         conn.commit()
         conn.close()
         return self._id
+
+    def to_dict(self):
+        """Convierte la alerta a un diccionario serializable."""
+        return {
+            "id": self._id,
+            "descripcion": self._descripcion,
+            "prioridad": self._prioridad,
+            "fecha_generacion": (
+                self._fecha_generacion.isoformat()
+                if isinstance(self._fecha_generacion, datetime.datetime)
+                else str(self._fecha_generacion)
+            ),
+            "estado": self._estado,
+            "id_vehiculo": self._id_vehiculo,
+            "tipo": "general",
+        }
