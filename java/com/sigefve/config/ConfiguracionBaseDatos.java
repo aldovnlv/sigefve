@@ -140,7 +140,11 @@ public class ConfiguracionBaseDatos {
                     InicializadorDatos inicio = new InicializadorDatos();
                     inicio.inicializar();
                 }
+                else{
+                    System.out.println("Ya esxisten datos. ¡OK!");
+                }
             }
+            
             
 
             
