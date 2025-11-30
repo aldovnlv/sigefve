@@ -132,6 +132,7 @@ public class ConfiguracionBaseDatos {
                     stmt.executeUpdate("CREATE DATABASE sigefve");
 
                     for (String sql : sqlCreacionTablas) {
+                        System.out.println("======================:    " + sql);
                         stmt.execute(sql);
                     }
 
