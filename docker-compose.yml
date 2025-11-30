@@ -24,9 +24,9 @@ services:
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/web-app:/var/www/html
 
-  sigefve_python:
-    hostname: sigefve_python
-    container_name: sigefve_python
+  sigefve-python:
+    hostname: sigefve-python
+    container_name: sigefve-python
     image: debian:12.1
     ports:
       - "8822:5001"
