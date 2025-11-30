@@ -128,7 +128,7 @@ public class ConfiguracionBaseDatos {
 
                 if (!rs.next()) {
                     // Crear la base de datos 'sigefve' si no existe
-                    System.out.println("La base de datos 'sigefve' no existe. Creándola...");
+                    System.out.println("La base de datos 'sigefve' no existe. Creandola...");
                     stmt.executeUpdate("CREATE DATABASE sigefve");
 
                     for (String sql : sqlCreacionTablas) {
