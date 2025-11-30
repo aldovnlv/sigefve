@@ -79,7 +79,7 @@ services:
         echo version 0.2
         javac -d out -cp .:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com/sigefve/ServidorHTTP.java
         javac -d out -cp .:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com/sigefve/utils/InicializadorDatos.java
-        : java -cp .:out:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com.sigefve.utils.InicializadorDatos
+        java -cp .:out:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com.sigefve.utils.InicializadorDatos
         java -cp .:out:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com.sigefve.ServidorHTTP
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/java:/root/java
