@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, send_file
 from flasgger import Swagger
 import io
 
+
 # Inicialización de componentes globales
 app = Flask(__name__)
 
@@ -23,6 +24,7 @@ analizador = AnalizadorRendimiento()
 gestor_eventos = GestorEventos()
 observador = ObservadorTelemetria()
 observador.suscribir(gestor_eventos)
+
 
 class ServicioPython:
     """
