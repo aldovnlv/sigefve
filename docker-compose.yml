@@ -101,7 +101,7 @@ services:
         echo stage 2
         java -cp .:out:jar/gson-2.11.0.jar:jar/postgresql-42.7.8.jar com.sigefve.ServidorHTTP
     volumes:
-      - ${SIGEFVE_BIND_BASE_PATH}/java:/root/java
+      - ${SIGEFVE_BIND_BASE_PATH}:/root/java
 
   sigefve_go:
     hostname: sigefve_go
