@@ -2,9 +2,10 @@ package com.sigefve.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.sigefve.utils.InicializadorDatos;
+// import com.sigefve.utils.InicializadorDatos;
 //import org.postgresql.*;
 
 public class ConfiguracionBaseDatos {
@@ -121,13 +122,21 @@ public class ConfiguracionBaseDatos {
         
         try (Connection conn = obtenerConexion();
              Statement stmt = conn.createStatement()) {
+                String checkTableQuery = "SELECT to_regclass('public.vehiculos')";
+            ResultSet rs = stmt.executeQuery(checkTableQuery);
+            if (rs.next()) {
+                String tableExists = rs.getString(1);
+                System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& " + tableExists);
+                // if (tableExists == null) {
+                // }
+            }
             
             for (String sql : sqlCreacionTablas) {
                 stmt.execute(sql);
             }
 
-            InicializadorDatos inicio = new InicializadorDatos();
-            inicio.inicializar();
+            // InicializadorDatos inicio = new InicializadorDatos();
+            // inicio.inicializar();
             
             System.out.println("Esquema de base de datos inicializado correctamente");
             
