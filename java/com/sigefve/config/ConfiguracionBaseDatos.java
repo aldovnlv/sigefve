@@ -16,6 +16,7 @@ public class ConfiguracionBaseDatos {
     private static ConfiguracionBaseDatos instancia;
     
     private ConfiguracionBaseDatos() {
+        System.out.println("********************* Configuracion de base de datos");
         try {
             Class.forName("org.postgresql.Driver");
             inicializarEsquema();
@@ -40,6 +41,7 @@ public class ConfiguracionBaseDatos {
     }
     
     private void inicializarEsquema() {
+        System.out.println("Inicializando esquema");
         String[] sqlCreacionTablas = {
             // Tabla vehiculos
             """
@@ -124,6 +126,7 @@ public class ConfiguracionBaseDatos {
 
         try (Connection conn = obtenerConexion();
              Statement stmt = conn.createStatement()) {
+                System.out.println("**************************** Verificando base de datos");
                  ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_database WHERE datname = 'sigefve'");
 
                 if (!rs.next()) {
