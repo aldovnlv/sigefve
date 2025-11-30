@@ -5,8 +5,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-// import com.sigefve.utils.InicializadorDatos;
 //import org.postgresql.*;
+
+import com.sigefve.utils.InicializadorDatos;
 
 public class ConfiguracionBaseDatos {
     private static final String URL = System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://postgresql_java:5432/sigefve");
@@ -132,16 +133,16 @@ public class ConfiguracionBaseDatos {
             if (resultado) {
                 String tableExists = rs.getString(1);
                 System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& " + tableExists);
-                // if (tableExists == null) {
-                // }
+                if (tableExists == null) {
+                    for (String sql : sqlCreacionTablas) {
+                        stmt.execute(sql);
+                    }
+                    InicializadorDatos inicio = new InicializadorDatos();
+                    inicio.inicializar();
+                }
             }
             
-            for (String sql : sqlCreacionTablas) {
-                stmt.execute(sql);
-            }
 
-            // InicializadorDatos inicio = new InicializadorDatos();
-            // inicio.inicializar();
             
             System.out.println("Esquema de base de datos inicializado correctamente");
             
