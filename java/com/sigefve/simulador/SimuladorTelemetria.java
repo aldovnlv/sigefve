@@ -68,10 +68,13 @@ public class SimuladorTelemetria {
     }
 
     private void generarTelemetriaParaTodos() throws SQLException {
-        // System.out.println(" >>>>>>>>>>>>>>>>>>>>      3      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        System.out.println(" >>>>>>>>>>>>>>>>>>>>      1      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         List<VehiculoElectrico> vehiculos = vehiculoDAO.obtenerTodos();
+        System.out.println(" >>>>>>>>>>>>>>>>>>>>      2      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         
         for (VehiculoElectrico vehiculo : vehiculos) {
+            System.out.println(" >>>>>>>>>>>>>>>>>>>>      3      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+
             EstadoSimulacion estado = estadosVehiculos.computeIfAbsent(
                 vehiculo.getId(), 
                 id -> new EstadoSimulacion(vehiculo)
