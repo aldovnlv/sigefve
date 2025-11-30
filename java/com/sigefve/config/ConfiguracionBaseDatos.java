@@ -16,7 +16,6 @@ public class ConfiguracionBaseDatos {
     private static ConfiguracionBaseDatos instancia;
     
     private ConfiguracionBaseDatos() {
-        System.out.println("********************* Configuracion de base de datos");
         try {
             Class.forName("org.postgresql.Driver");
             inicializarEsquema();
@@ -41,7 +40,6 @@ public class ConfiguracionBaseDatos {
     }
     
     private void inicializarEsquema() {
-        System.out.println("Inicializando esquema");
         String[] sqlCreacionTablas = {
             // Tabla vehiculos
             """
@@ -126,29 +124,21 @@ public class ConfiguracionBaseDatos {
 
         try (Connection conn = obtenerConexion();
              Statement stmt = conn.createStatement()) {
-                System.out.println("**************************** Verificando base de datos");
-                ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_database WHERE datname = 'sigefve'");
-                boolean resultado = rs.next();
-                System.out.println("++++++++++++++++++++++++++++++++++++ Verificando resultado");
-                System.out.println(resultado);
-                System.out.println("++++++++++++++++++++++++++++++++++++ Verificando resultado");
-                if (!rs.next()) {
-                    // Crear la base de datos 'sigefve' si no existe
-                    System.out.println("La base de datos 'sigefve' no existe. Creandola...");
-                    stmt.executeUpdate("CREATE DATABASE sigefve");
-
-                    for (String sql : sqlCreacionTablas) {
-                        System.out.println("======================:    " + sql);
-                        stmt.execute(sql);
-                    }
-
-                    // InicializadorDatos inicio = new InicializadorDatos();
-                    // inicio.inicializar();
-                }
+                
+            String checkTableQuery = "SELECT to_regclass('public.vehiculos')";
+            ResultSet rs = stmt.executeQuery(checkTableQuery);
+            boolean resultado = rs.next();
+                System.out.println("+++++++++++++++++++++++++++++++++++   " + resultado);
+            if (resultado) {
+                String tableExists = rs.getString(1);
+                System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& " + tableExists);
+                // if (tableExists == null) {
+                // }
+            }
             
-            // for (String sql : sqlCreacionTablas) {
-            //     stmt.execute(sql);
-            // }
+            for (String sql : sqlCreacionTablas) {
+                stmt.execute(sql);
+            }
 
             // InicializadorDatos inicio = new InicializadorDatos();
             // inicio.inicializar();
