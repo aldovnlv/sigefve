@@ -57,8 +57,8 @@ services:
     image: debian:12.1
     environment:
       - DB_URL:jdbc:postgresql://postgresql_java:5432/sigefve
-      - DB_USER:data
-      - DB_PASSWORD:data
+      - DB_USER:postgres
+      - DB_PASSWORD:postgres
     ports:
       - "${JAVA_PORT}:8585"
     restart: unless-stopped
