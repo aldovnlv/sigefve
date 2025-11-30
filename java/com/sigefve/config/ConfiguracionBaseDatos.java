@@ -127,8 +127,11 @@ public class ConfiguracionBaseDatos {
         try (Connection conn = obtenerConexion();
              Statement stmt = conn.createStatement()) {
                 System.out.println("**************************** Verificando base de datos");
-                 ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_database WHERE datname = 'sigefve'");
-
+                ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_database WHERE datname = 'sigefve'");
+                boolean resultado = rs.next();
+                System.out.println("++++++++++++++++++++++++++++++++++++ Verificando resultado");
+                System.out.println(resultado);
+                System.out.println("++++++++++++++++++++++++++++++++++++ Verificando resultado");
                 if (!rs.next()) {
                     // Crear la base de datos 'sigefve' si no existe
                     System.out.println("La base de datos 'sigefve' no existe. Creandola...");
