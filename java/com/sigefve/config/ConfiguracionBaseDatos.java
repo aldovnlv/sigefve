@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.sigefve.utils.InicializadorDatos;
 //import org.postgresql.*;
 
 public class ConfiguracionBaseDatos {
@@ -124,6 +125,9 @@ public class ConfiguracionBaseDatos {
             for (String sql : sqlCreacionTablas) {
                 stmt.execute(sql);
             }
+
+            InicializadorDatos inicio = new InicializadorDatos();
+            inicio.inicializar();
             
             System.out.println("Esquema de base de datos inicializado correctamente");
             
