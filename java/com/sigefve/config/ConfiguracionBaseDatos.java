@@ -124,7 +124,7 @@ public class ConfiguracionBaseDatos {
 
         try (Connection conn = obtenerConexion();
              Statement stmt = conn.createStatement()) {
-                ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_database WHERE datname = sigefve'");
+                 ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_database WHERE datname = 'sigefve'");
 
                 if (!rs.next()) {
                     // Crear la base de datos 'sigefve' si no existe
