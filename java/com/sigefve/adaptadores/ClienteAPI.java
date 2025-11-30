@@ -11,7 +11,7 @@ import java.lang.System;
 
 public class ClienteAPI {
 
-    private String urlBaseSigefve = "sigefve-python:5001/";
+    private String urlBaseSigefve = "http://sigefve-python:5001/";
 
     /**
      * 
