@@ -119,21 +119,29 @@ public class ConfiguracionBaseDatos {
             "CREATE INDEX IF NOT EXISTS idx_entregas_ruta ON entregas(ruta_id)",
             "CREATE INDEX IF NOT EXISTS idx_vehiculos_estado ON vehiculos(estado)"
         };
-        
+
+
+
         try (Connection conn = obtenerConexion();
              Statement stmt = conn.createStatement()) {
-                String checkTableQuery = "SELECT to_regclass('public.vehiculos')";
-            ResultSet rs = stmt.executeQuery(checkTableQuery);
-            if (rs.next()) {
-                String tableExists = rs.getString(1);
-                System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& " + tableExists);
-                // if (tableExists == null) {
-                // }
-            }
+                ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_database WHERE datname = sigefve'");
+
+                if (!rs.next()) {
+                    // Crear la base de datos 'sigefve' si no existe
+                    System.out.println("La base de datos 'sigefve' no existe. Creándola...");
+                    stmt.executeUpdate("CREATE DATABASE sigefve");
+
+                    for (String sql : sqlCreacionTablas) {
+                        stmt.execute(sql);
+                    }
+
+                    // InicializadorDatos inicio = new InicializadorDatos();
+                    // inicio.inicializar();
+                }
             
-            for (String sql : sqlCreacionTablas) {
-                stmt.execute(sql);
-            }
+            // for (String sql : sqlCreacionTablas) {
+            //     stmt.execute(sql);
+            // }
 
             // InicializadorDatos inicio = new InicializadorDatos();
             // inicio.inicializar();
