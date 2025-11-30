@@ -11,7 +11,7 @@ import java.lang.System;
 
 public class ClienteAPI {
 
-    private String urlBaseSigefve = "https://tapython.xipatlani.tk/";
+    private String urlBaseSigefve = "http://sigefve_python:5001/";
 
     /**
      * 
