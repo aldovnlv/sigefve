@@ -84,7 +84,9 @@ services:
       - |
         export DEBIAN_FRONTEND=noninteractive
         ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
+        echo actualizando repositorios ...>
         apt -y update > /dev/null 2>&1
+        echo instalando jdk ...>
         apt install -y default-jdk > /dev/null 2>&1
         java -version
         date
