@@ -51,6 +51,20 @@ services:
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/python:/python
 
+  postgresql_java:
+    hostname: postgresql_java
+    container_name: postgresql_java
+    image: postgres:14-alpine
+    restart: unless-stopped
+    ports:
+      - 54302:5432
+    volumes:
+      - ${SIGEFVE_BIND_BASE_PATH}/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=sigefve
+
   sigefve_java:
     hostname: sigefve_java
     container_name: sigefve_java
@@ -86,19 +100,6 @@ services:
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/java:/root/java
 
-  postgresql_java:
-    hostname: postgresql_java
-    container_name: postgresql_java
-    image: postgres:14-alpine
-    restart: unless-stopped
-    ports:
-      - 54302:5432
-    volumes:
-      - ${SIGEFVE_BIND_BASE_PATH}/apps/postgres:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=sigefve
 
   sigefve_go:
     hostname: sigefve_go
