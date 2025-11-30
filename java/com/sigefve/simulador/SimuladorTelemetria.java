@@ -68,13 +68,10 @@ public class SimuladorTelemetria {
     }
 
     private void generarTelemetriaParaTodos() throws SQLException {
-        System.out.println(" >>>>>>>>>>>>>>>>>>>>      1      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        // System.out.println(" >>>>>>>>>>>>>>>>>>>>      3      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         List<VehiculoElectrico> vehiculos = vehiculoDAO.obtenerTodos();
-        System.out.println(" >>>>>>>>>>>>>>>>>>>>      2      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         
         for (VehiculoElectrico vehiculo : vehiculos) {
-            System.out.println(" >>>>>>>>>>>>>>>>>>>>      3      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-
             EstadoSimulacion estado = estadosVehiculos.computeIfAbsent(
                 vehiculo.getId(), 
                 id -> new EstadoSimulacion(vehiculo)
@@ -85,9 +82,7 @@ public class SimuladorTelemetria {
 
             // Envio hacia Python
             String json = "{\n    \"id_vehiculo\":"+vehiculo.getId()+",\n    \"nivel_bateria\":"+Math.round(telemetria.getNivelBateria() * 100.0)/100.0+",\n    \"temperatura\":"+Math.round(telemetria.getTemperaturaMotor()*100.0)/100.0+"}";
-            System.out.println("aqui si");
             peticion.peticionPost("telemetria", json);
-            System.out.println("aqui no");
             
             // Log periodico cada minuto (cada 4 ciclos de 15s)
             if (estado.ciclos % 4 == 0) {
