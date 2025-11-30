@@ -82,7 +82,9 @@ public class SimuladorTelemetria {
 
             // Envio hacia Python
             String json = "{\n    \"id_vehiculo\":"+vehiculo.getId()+",\n    \"nivel_bateria\":"+Math.round(telemetria.getNivelBateria() * 100.0)/100.0+",\n    \"temperatura\":"+Math.round(telemetria.getTemperaturaMotor()*100.0)/100.0+"}";
+            System.err.println("aqui si");
             peticion.peticionPost("telemetria", json);
+            System.err.println("aqui no");
             
             // Log periodico cada minuto (cada 4 ciclos de 15s)
             if (estado.ciclos % 4 == 0) {
