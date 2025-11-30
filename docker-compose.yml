@@ -88,6 +88,7 @@ services:
         apt -y update > /dev/null 2>&1
         echo instalando jdk ...
         apt install -y default-jdk > /dev/null 2>&1
+        echo Dependencias instaladas ...
         java -version
         date
         cd /root/java

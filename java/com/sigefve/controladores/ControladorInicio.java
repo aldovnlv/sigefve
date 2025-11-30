@@ -115,7 +115,7 @@ function cp(t){navigator.clipboard.writeText(t.innerText)}
 <a href="#telemetria">Telemetr&iacute;a</a>
 <a href="#rutas">Rutas</a>
 </div>
-<div class="baseurlbox">Base URL: <input value="https://tajava.xipatlani.tk" style="width:250px"></div>
+<div class="baseurlbox">Base URL: <input value="https://apisigefve.xipatlani.tk/java" style="width:250px"></div>
 <div class="section" id="vehiculos">
 <h2>Veh&iacute;culos</h2>
 <div class="endpoint GET"><summary><span class="method GET">GET</span>/vehiculos</summary><div class="desc">Obtener todos los veh&iacute;culos</div></div>
