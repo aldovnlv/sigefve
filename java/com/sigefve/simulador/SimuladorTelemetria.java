@@ -24,7 +24,7 @@ public class SimuladorTelemetria {
     private final Random random;
     private final Map<Long, EstadoSimulacion> estadosVehiculos;
     
-    // Coordenadas base (Celaya, Guanajuato, Mexico)
+    // Coordenadas base (Orizaba, Veracruz, Mexico)
     private static final double LATITUD_BASE = 18.85923285;
     private static final double LONGITUD_BASE = -97.1106537405747;
     private static final double RADIO_OPERACION = 0.1; // ~11 km
