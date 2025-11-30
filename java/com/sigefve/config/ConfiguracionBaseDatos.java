@@ -141,7 +141,7 @@ public class ConfiguracionBaseDatos {
                     inicio.inicializar();
                 }
                 else{
-                    System.out.println("Ya esxisten datos. ¡OK!");
+                    System.out.println("Ya existen datos. OK");
                 }
             }
             
