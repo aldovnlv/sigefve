@@ -4,9 +4,10 @@ import (
 	"go-gin-gateway/auth"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/cors"
 	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 // Mapa simple de usuarios válidos
@@ -19,7 +20,7 @@ func PrepararRutas() *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://front.xipatlani.tk"}, // tu frontend real
+		AllowOrigins:     []string{"*"}, // tu frontend real
 		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
