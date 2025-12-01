@@ -12,7 +12,7 @@ import com.sigefve.utils.InicializadorDatos;
 public class ConfiguracionBaseDatos {
     private static final String URL = System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://postgresql_java:5432/sigefve");
     private static final String USUARIO = System.getenv().getOrDefault("DB_USER", "postgres");
-    private static final String CONTRASENA = System.getenv().getOrDefault("DB_PASSWORD", "postgres");
+    private static final String CONTRASENA = System.getenv().getOrDefault("DB_PASSWORD", "postgresjava");
     
     private static ConfiguracionBaseDatos instancia;
     

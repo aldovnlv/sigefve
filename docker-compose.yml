@@ -59,9 +59,9 @@ services:
     ports:
       - 54302:5432
     volumes:
-      - ${SIGEFVE_BIND_BASE_PATH}/apps/postgres:/var/lib/postgresql/data
+      - ${SIGEFVE_PERSISTENCE_PATH}/apps/postgres:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=postgresjava
       - POSTGRES_USER=postgres
       - POSTGRES_DB=sigefve
 
@@ -72,7 +72,7 @@ services:
     environment:
       - DB_URL:jdbc:postgresql://postgresql_java:5432/sigefve
       - DB_USER:postgres
-      - DB_PASSWORD:postgres
+      - DB_PASSWORD:postgresjava
     ports:
       - "${JAVA_PORT}:8585"
     restart: unless-stopped
