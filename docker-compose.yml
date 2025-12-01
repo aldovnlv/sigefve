@@ -173,7 +173,7 @@ services:
         pwd
         ls -la
         npm install
-        npm build
+        npm run build
         tail -F continue
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/frontend:/root/react
