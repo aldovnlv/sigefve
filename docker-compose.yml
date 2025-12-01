@@ -146,3 +146,37 @@ services:
         tail -F keep.alive
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/go:/go
+
+ frontend-react:
+    hostname: frontend-react
+    container_name: frontend-react
+    image: debian:12.1
+  
+    ports:
+      - "13000:13000"
+    restart: unless-stopped
+    # depends_on:
+    #   - postgresql_java
+    command:
+      - /bin/bash
+      - -c
+      - |
+        export DEBIAN_FRONTEND=noninteractive
+        ln -snf /usr/share/zoneinfo/America/Mexico_City /etc/localtime && echo America/Mexico_City > /etc/timezone
+        echo actualizando repositorios ...
+        apt -y update > /dev/null 2>&1
+        echo instalando jdk ...
+        npm install -y npm > /dev/null 2>&1
+        echo Dependencias instaladas ...
+        java -version
+        date
+        cd /root/java
+
+        cd /root/react
+        pwd
+        ls -la
+        npm install
+        npm start
+        tail -F continue
+    volumes:
+      - ${SIGEFVE_BIND_BASE_PATH}/react:/root/react
