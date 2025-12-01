@@ -176,4 +176,4 @@ services:
         npm start
         tail -F continue
     volumes:
-      - ${SIGEFVE_BIND_BASE_PATH}/react:/root/react
+      - ${SIGEFVE_BIND_BASE_PATH}/frontend:/root/react
