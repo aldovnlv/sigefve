@@ -19,7 +19,7 @@ export default function Login() {
     try {
       alert("try")
 
-      const data = await apiFetch("https://apisigefve.xipatlani.tk/login", {
+      const data = await apiFetch("/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
