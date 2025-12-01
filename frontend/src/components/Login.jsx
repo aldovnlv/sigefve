@@ -7,7 +7,6 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e) => {
-    alert("1")
     e.preventDefault();
     setErrorMsg("");
 
@@ -15,23 +14,23 @@ export default function Login() {
     const formBody = new URLSearchParams();
     formBody.append("username", username);
     formBody.append("password", password);
-    alert("1")
+    alert("2")
 
     try {
-    alert("try")
+      alert("try")
 
-      const data = await apiFetch("/login", {
+      const data = await apiFetch("https://apisigefve.xipatlani.tk/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(formBody)
       });
-
+      alert("data")
       if (!data || !data.token) {
         throw new Error("Credenciales incorrectas");
       }
-
+      alert("credenciales")
       console.log("Token recibido:", data.token);
 
       localStorage.setItem("token", data.token);
