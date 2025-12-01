@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/rs/cors"
 )
 
 // Mapa simple de usuarios válidos
@@ -14,8 +16,18 @@ var usuarios = map[string]string{
 }
 
 func PrepararRutas() *gin.Engine {
+	// Configuración CORS
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"https://example.com"}, // Aquí va tu dominio frontend
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"}, // Métodos permitidos
+		AllowedHeaders:   []string{"Content-Type", "Authorization"}, // Cabeceras permitidas
+		AllowCredentials: true, // Permitir credenciales (cookies, encabezados)
+	})
+
 	r := gin.Default()
 
+	r.Use(c)
+	
 	// Endpoint para iniciar sesión
 	r.POST("/login", CORSMiddleware(), func(c *gin.Context) {
 		var credenciales struct {
