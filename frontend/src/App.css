@@ -1,0 +1,73 @@
+/* Estilos globales del proyecto SIGEFVE */
+
+body {
+  background: #f4f6fb;
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.metric-box {
+  flex: 1;
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.metric-number {
+  font-size: 26px;
+  font-weight: bold;
+  color: #2a3b8f;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #555;
+}
+
+.vehicle-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.vehicle-item:hover {
+  background: #f2f4fc;
+}
+
+.alert-box {
+  border-left: 5px solid #ff3b3b;
+  padding: 12px;
+  background: #fff0f0;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.alert-medium {
+  border-left-color: #ffb038;
+  background: #fff7e6;
+}
+
+.map-container {
+  height: 360px;
+  background: #e8efff;
+  border-radius: 12px;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-point {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  position: absolute;
+}
