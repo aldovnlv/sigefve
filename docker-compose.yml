@@ -54,16 +54,16 @@ services:
   postgresql_java:
     hostname: postgresql_java
     container_name: postgresql_java
-    image: postgres:14-alpine
+    image: postgres:18.1
     restart: unless-stopped
     ports:
       - 54302:5432
     volumes:
       - ${SIGEFVE_PERSISTENCE_PATH}/apps/postgres:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=postgresjava
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=sigefve
+      POSTGRES_PASSWORD: postgresjava
+      POSTGRES_USER: postgres
+      POSTGRES_DB: sigefve
 
   sigefve_java:
     hostname: sigefve_java
