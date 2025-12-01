@@ -181,8 +181,10 @@ services:
       - ${SIGEFVE_PERSISTENCE_PATH}/frontend/build:/root/react/build
 
   
-  nginx:
-    image: nginx:stable
+  nginx-apigo:
+    hostname: nginx-apigo
+    container_name: nginx-apigo
+    image: nginx:1.27.3-bookworm
     ports:
       - "13000:80"
     volumes:
