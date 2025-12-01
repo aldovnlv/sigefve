@@ -7,6 +7,7 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e) => {
+    alert("1")
     e.preventDefault();
     setErrorMsg("");
 
@@ -14,8 +15,11 @@ export default function Login() {
     const formBody = new URLSearchParams();
     formBody.append("username", username);
     formBody.append("password", password);
+    alert("1")
 
     try {
+    alert("try")
+
       const data = await apiFetch("/login", {
         method: "POST",
         headers: {
@@ -38,6 +42,8 @@ export default function Login() {
       window.location.href = "/dashboard";
 
     } catch (error) {
+    alert("catch")
+
       console.error(error);
       setErrorMsg(error.message || "Error al iniciar sesión");
     }
