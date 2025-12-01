@@ -168,10 +168,7 @@ services:
         echo instalando jdk ...
         npm install -y npm > /dev/null 2>&1
         echo Dependencias instaladas ...
-        java -version
-        date
-        cd /root/java
-
+        
         cd /root/react
         pwd
         ls -la
