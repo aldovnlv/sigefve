@@ -17,7 +17,7 @@ func PrepararRutas() *gin.Engine {
 	r := gin.Default()
 
 	// Endpoint para iniciar sesión
-	r.POST("/login", func(c *gin.Context) {
+	r.POST("/login", CORSMiddleware(), func(c *gin.Context) {
 		var credenciales struct {
 			Usuario     string `json:"username"`
 			Contrasenia string `json:"password"`
@@ -39,8 +39,8 @@ func PrepararRutas() *gin.Engine {
 	})
 
 	// Rutas protegidas
-	r.Any("/python/*path", auth.JWTMiddleware(), ReverseProxy("http://149.202.215.39:8822"))
-	r.Any("/java/*path", auth.JWTMiddleware(), ReverseProxy("http://149.202.215.39:8585"))
+	r.Any("/python/*path", auth.JWTMiddleware(), CORSMiddleware(), ReverseProxy("http://149.202.215.39:8822"))
+	r.Any("/java/*path", auth.JWTMiddleware(), CORSMiddleware(), ReverseProxy("http://149.202.215.39:8585"))
 
 	return r
 }
