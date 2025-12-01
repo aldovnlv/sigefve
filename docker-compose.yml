@@ -65,6 +65,20 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: sigefve
 
+  postgresql_go:
+    hostname: postgresql_go
+    container_name: postgresql_go
+    image: postgres:18.1
+    restart: unless-stopped
+    ports:
+      - 54402:5432
+    volumes:
+      - ${SIGEFVE_PERSISTENCE_PATH}/go/postgres:/var/lib/postgresql
+    environment:
+      POSTGRES_PASSWORD: postgresgo
+      POSTGRES_USER: postgres
+      POSTGRES_DB: api-go
+
   sigefve_java:
     hostname: sigefve_java
     container_name: sigefve_java
