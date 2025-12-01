@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/rs/cors"
+	"github.com/gin-contrib/cors"
+	"time"
 )
 
 // Mapa simple de usuarios válidos
@@ -16,20 +16,19 @@ var usuarios = map[string]string{
 }
 
 func PrepararRutas() *gin.Engine {
-	// Configuración CORS
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://example.com"}, // Aquí va tu dominio frontend
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS"}, // Métodos permitidos
-		AllowedHeaders:   []string{"Content-Type", "Authorization"}, // Cabeceras permitidas
-		AllowCredentials: true, // Permitir credenciales (cookies, encabezados)
-	})
-
 	r := gin.Default()
 
-	r.Use(c)
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://front.xipatlani.tk"}, // tu frontend real
+		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	
 	// Endpoint para iniciar sesión
-	r.POST("/login", CORSMiddleware(), func(c *gin.Context) {
+	r.POST("/login", func(c *gin.Context) {
 		var credenciales struct {
 			Usuario     string `json:"username"`
 			Contrasenia string `json:"password"`
@@ -51,8 +50,8 @@ func PrepararRutas() *gin.Engine {
 	})
 
 	// Rutas protegidas
-	r.Any("/python/*path", auth.JWTMiddleware(), CORSMiddleware(), ReverseProxy("http://149.202.215.39:8822"))
-	r.Any("/java/*path", auth.JWTMiddleware(), CORSMiddleware(), ReverseProxy("http://149.202.215.39:8585"))
+	r.Any("/python/*path", auth.JWTMiddleware(), ReverseProxy("http://149.202.215.39:8822"))
+	r.Any("/java/*path", auth.JWTMiddleware(), ReverseProxy("http://149.202.215.39:8585"))
 
 	return r
 }
