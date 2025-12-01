@@ -147,7 +147,7 @@ services:
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/go:/go
 
- frontend-react:
+  frontend-react:
     hostname: frontend-react
     container_name: frontend-react
     image: debian:12.1
