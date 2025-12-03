@@ -1,80 +1,82 @@
-import React, { useState } from "react";
-import { apiFetch } from "../api/api";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import authService from '../services/authService';
+import '../styles/Login.css';
 
-export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+const Login = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg("");
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
 
-    // ESTA LÍNEA ES LA QUE FALTABA — AHORA ESTÁ DEFINIDA
-    const formBody = new URLSearchParams();
-    formBody.append("username", username);
-    formBody.append("password", password);
-    alert("2")
+        try {
+            const { rol } = await authService.login(username, password);
 
-    try {
-      alert("try")
+            // Redirigir según el rol del usuario
+            if (rol === 'Administrador') {
+                navigate('/admin');
+            } else if (rol === 'Conductor') {
+                navigate('/conductor');
+            } else {
+                navigate('/');
+            }
+        } catch (err) {
+            setError(err.response?.data?.error || 'Error al iniciar sesión');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      const data = await apiFetch("/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(formBody)
-      });
-      alert("data")
-      if (!data || !data.token) {
-        throw new Error("Credenciales incorrectas");
-      }
-      alert("credenciales")
-      console.log("Token recibido:", data.token);
+    return (
+        <div className="login-container">
+            <div className="login-card">
+                <div className="login-header">
+                    <h1>SIGEFVE</h1>
+                    <p>Sistema de Gestión de Flota de Vehículos Eléctricos</p>
+                </div>
 
-      localStorage.setItem("token", data.token);
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div className="form-group">
+                        <label htmlFor="username">Usuario</label>
+                        <input
+                            id="username"
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            placeholder="Ingresa tu usuario"
+                            disabled={loading}
+                        />
+                    </div>
 
-      alert("Inicio de sesión exitoso");
+                    <div className="form-group">
+                        <label htmlFor="password">Contraseña</label>
+                        <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            placeholder="Ingresa tu contraseña"
+                            disabled={loading}
+                        />
+                    </div>
 
-      // Redirigir al dashboard
-      window.location.href = "/dashboard";
+                    {error && <div className="error-message">{error}</div>}
 
-    } catch (error) {
-    alert("catch")
+                    <button type="submit" className="btn-primary" disabled={loading}>
+                        {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+};
 
-      console.error(error);
-      setErrorMsg(error.message || "Error al iniciar sesión");
-    }
-  };
-
-  return (
-    <div style={{ padding: 30 }}>
-      <h2>Iniciar sesión</h2>
-
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Usuario"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        {errorMsg && (
-          <p style={{ color: "red" }}>
-            {errorMsg}
-          </p>
-        )}
-
-        <button type="submit">Entrar</button>
-      </form>
-    </div>
-  );
-}
+export default Login;

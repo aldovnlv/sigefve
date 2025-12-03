@@ -1,0 +1,192 @@
+.vehiculo-detalle-container {
+    min-height: calc(100vh - 64px);
+    background-color: var(--color-bg);
+    padding: 2rem;
+}
+
+.detalle-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.btn-back {
+    background: white;
+    border: 2px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.detalle-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.detalle-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.detalle-card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: var(--color-bg);
+    border-radius: var(--radius-sm);
+}
+
+.info-item .label {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    font-weight: 500;
+}
+
+.info-item .value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.telemetria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.telemetria-card {
+    background-color: var(--color-bg);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tele-label {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tele-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.tele-value-small {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.bateria-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 4px solid;
+}
+
+.bateria-circle.bateria-alta {
+    border-color: var(--color-success);
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.bateria-circle.bateria-media {
+    border-color: var(--color-warning);
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.bateria-circle.bateria-baja {
+    border-color: var(--color-danger);
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.bateria-circle .tele-value {
+    font-size: 1.25rem;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+.ubicacion-cell {
+    font-size: 0.75rem;
+    font-family: monospace;
+}
+
+.error-container {
+    padding: 3rem;
+    text-align: center;
+}
+
+.error-container p {
+    font-size: 1.125rem;
+    color: var(--color-danger);
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .vehiculo-detalle-container {
+        padding: 1rem;
+    }
+
+    .detalle-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detalle-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detalle-header h1 {
+        font-size: 1.5rem;
+    }
+}

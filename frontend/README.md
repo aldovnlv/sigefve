@@ -1,70 +1,174 @@
-# Getting Started with Create React App
+# SIGEFVE Frontend - React
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Frontend React con patrón MVC para el Sistema de Gestión de Flota de Vehículos Eléctricos (SIGEFVE).
 
-## Available Scripts
+## Características
 
-In the project directory, you can run:
+- ✅ Login con autenticación JWT
+- ✅ Rutas protegidas con control de acceso basado en roles
+- ✅ Dashboard para Administrador con:
+  - Lista de vehículos con estado y batería
+  - Alertas activas ordenadas por prioridad
+  - Estadísticas de la flota
+  - Descarga de reportes en CSV
+- ✅ Dashboard para Conductor con:
+  - Vista de vehículo asignado
+  - Telemetría en tiempo real
+  - Rutas y entregas asignadas
+- ✅ Integración completa con API Gateway
 
-### `npm start`
+## Tecnologías
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- React 18
+- React Router v6
+- Axios
+- Vite
+- CSS Vanilla (sin frameworks)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Instalación
 
-### `npm test`
+```bash
+cd frontend
+npm install
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Configuración
 
-### `npm run build`
+El archivo `.env` ya está configurado con la URL del API Gateway:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+VITE_API_URL=https://apisigefve.xipatlani.tk
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Ejecución
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Modo Desarrollo
 
-### `npm run eject`
+```bash
+npm run dev
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+El servidor se inicia en `http://localhost:5173`
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Build para Producción
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+npm run build
+npm run preview
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Estructura del Proyecto
 
-## Learn More
+```
+frontend/
+├── src/
+│   ├── components/         # Componentes React (Vistas)
+│   │   ├── Login.jsx
+│   │   ├── DashboardAdmin.jsx
+│   │   ├── DashboardConductor.jsx
+│   │   ├── VehiculosList.jsx
+│   │   ├── AlertasList.jsx
+│   │   └── ProtectedRoute.jsx
+│   ├── services/           # Servicios API (Modelos)
+│   │   ├── api.js
+│   │   ├── authService.js
+│   │   ├── vehiculoService.js
+│   │   ├── telemetriaService.js
+│   │   ├── rutaService.js
+│   │   ├── alertaService.js
+│   │   └── estadisticaService.js
+│   ├── hooks/              # Hooks personalizados (Controladores)
+│   │   └── useAuth.js
+│   ├── utils/              # Utilidades
+│   │   └── tokenUtils.js
+│   ├── styles/             # Estilos CSS
+│   │   ├── Login.css
+│   │   ├── Dashboard.css
+│   │   ├── Vehiculos.css
+│   │   └── Alertas.css
+│   ├── App.jsx             # Componente raíz con rutas
+│   ├── main.jsx            # Punto de entrada
+│   └── index.css           # Estilos globales
+├── index.html
+├── package.json
+├── vite.config.js
+└── .env
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Rutas de la Aplicación
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- `/` - Redirige a `/login` o al dashboard correspondiente según autenticación
+- `/login` - Pantalla de inicio de sesión
+- `/admin` - Dashboard del Administrador (requiere rol "Administrador")
+- `/conductor` - Dashboard del Conductor (requiere rol "Conductor")
 
-### Code Splitting
+## Uso
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Login
 
-### Analyzing the Bundle Size
+1. Acceder a `http://localhost:5173/login`
+2. Ingresar credenciales:
+   - Usuario Administrador o Conductor
+   - Contraseña
+3. El sistema redirige automáticamente según el rol
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Dashboard Administrador
 
-### Making a Progressive Web App
+- Ver todos los vehículos de la flota
+- Monitorear alertas activas
+- Consultar estadísticas generales
+- Descargar reportes CSV
+- Desactivar alertas
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Dashboard Conductor
 
-### Advanced Configuration
+- Ver vehículo asignado
+- Consultar telemetría actual
+- Revisar rutas asignadas
+- Ver entregas pendientes/completadas
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## API Endpoints Utilizados
 
-### Deployment
+### Autenticación
+- `POST /login` - Inicio de sesión
+- `POST /logout` - Cierre de sesión
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Vehículos (Java)
+- `GET /java/vehiculos` - Listar vehículos
+- `GET /java/vehiculos/:id` - Obtener vehículo
+- `POST /java/vehiculos` - Crear vehículo
+- `PUT /java/vehiculos/:id` - Actualizar vehículo
+- `DELETE /java/vehiculos/:id` - Eliminar vehículo
+- `PUT /java/vehiculos/:id/estado` - Actualizar estado
 
-### `npm run build` fails to minify
+### Telemetría (Java)
+- `GET /java/telemetria/vehiculo/:id` - Historial de telemetría
+- `GET /java/telemetria/vehiculo/:id/ultima` - Última telemetría
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Rutas (Java)
+- `GET /java/rutas` - Listar rutas
+- `POST /java/rutas` - Crear ruta
+- `GET /java/rutas/:id/entregas` - Entregas de una ruta
+- `PUT /java/rutas/:id/asignar` - Asignar vehículo a ruta
+
+### Alertas (Python)
+- `GET /python/alertas` - Listar alertas
+- `PATCH /python/alertas/desactivar` - Desactivar alertas
+
+### Estadísticas (Python)
+- `GET /python/estadisticas` - Estadísticas de la flota
+- `GET /python/reporte/csv` - Descargar reporte CSV
+
+## Seguridad
+
+- Autenticación mediante JWT
+- Token almacenado en localStorage
+- Interceptor de Axios para agregar token a todas las peticiones
+- Redirección automática a login en caso de sesión expirada (401)
+- Rutas protegidas con verificación de rol
+
+## Patrón MVC Implementado
+
+- **Modelos**: Servicios en `src/services/` que manejan la lógica de datos y comunicación con API
+- **Vistas**: Componentes React en `src/components/` que renderizan la interfaz
+- **Controladores**: Hooks personalizados en `src/hooks/` que gestionan el estado y la lógica de negocio
