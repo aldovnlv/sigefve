@@ -33,7 +33,7 @@ public class ControladorRutas implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        configurarCORS(exchange);
+        //configurarCORS(exchange);
         
         if (exchange.getRequestMethod().equals("OPTIONS")) {
             enviarRespuesta(exchange, 200, "");
