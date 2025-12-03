@@ -1,67 +1,61 @@
-import api from './api';
+import { AdminUser } from '../models/User';
+import { apiPost } from './apiClient';
 
-const authService = {
-    // Iniciar sesión
-    async login(username, password) {
-        try {
-            const response = await api.post('/login', { username, password });
-            const { token, rol, user_id } = response.data;
+class AuthService {
+  constructor() {
+    this.storageKey = 'token';
+  }
 
-            // Guardar token y datos de usuario en localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify({
-                id: user_id,
-                username,
-                rol
-            }));
+  async login(username, password) {
+    const res = await apiPost('/login', { username, password });
 
-            return { token, rol, user_id };
-        } catch (error) {
-            throw error;
-        }
-    },
+    const token = res.token;
+    const user = res.user || {};
 
-    // Cerrar sesión
-    async logout() {
-        try {
-            await api.post('/logout');
-        } catch (error) {
-            console.error('Error al cerrar sesión:', error);
-        } finally {
-            // Limpiar localStorage
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-        }
-    },
-
-    // Obtener usuario actual
-    getCurrentUser() {
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            try {
-                return JSON.parse(userStr);
-            } catch (error) {
-                return null;
-            }
-        }
-        return null;
-    },
-
-    // Obtener token
-    getToken() {
-        return localStorage.getItem('token');
-    },
-
-    // Verificar si está autenticado
-    isAuthenticated() {
-        return !!this.getToken();
-    },
-
-    // Verificar si el usuario tiene un rol específico
-    hasRole(role) {
-        const user = this.getCurrentUser();
-        return user?.rol === role;
+    if (!token) {
+      throw new Error('La API de login no devolvió un token válido.');
     }
-};
 
-export default authService;
+    localStorage.setItem(this.storageKey, token);
+
+    const domainUser = new AdminUser(user.id || '1', user.nombre || user.name || 'Administrador');
+    return domainUser;
+  }
+
+  logout() {
+    localStorage.removeItem(this.storageKey);
+  }
+
+  getToken() {
+    return localStorage.getItem(this.storageKey);
+  }
+
+  decodeToken() {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const parts = token.split('.');
+      if (parts.length < 2) return null;
+      const payloadB64 = parts[1];
+      const json = atob(payloadB64);
+      return JSON.parse(json);
+    } catch (err) {
+      console.error('Error al decodificar token', err);
+      return null;
+    }
+  }
+
+  isAuthenticated() {
+    const payload = this.decodeToken();
+    if (!payload) return false;
+
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp <= now) {
+      return false;
+    }
+    return true;
+  }
+}
+
+export const authService = new AuthService();
