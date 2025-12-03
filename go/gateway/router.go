@@ -2,27 +2,36 @@ package gateway
 
 import (
 	"go-gin-gateway/auth"
+	"go-gin-gateway/database"
 	"go-gin-gateway/middleware"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-// URLs de los microservicios
+// URL de los microservicios
 const (
-	pythonServiceURL = "http://149.202.215.39:8822"
-	javaServiceURL   = "http://149.202.215.39:8585"
+	pythonURL = "http://sigefve-python:5001"
+	javaURL   = "http://sigefve_java:8585"
 )
 
-func PrepararRutas() *gin.Engine {
+type Router struct{}
+
+func (router Router) PrepararRutas() *gin.Engine {
+	autenticador := auth.Autenticador{}
+
 	r := gin.Default()
 
+	r.SetTrustedProxies([]string{"172.16.0.0/12", "192.168.0.0/16"})
+
+	r.Use(middleware.RateLimitMiddleware())
 	r.Use(middleware.LogPeticiones())
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // tu frontend real
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -51,7 +60,7 @@ func PrepararRutas() *gin.Engine {
 		}
 
 		// 2. Registrar el usuario en la BD
-		user, err := auth.RegistrarUsuario(
+		user, err := autenticador.RegistrarUsuario(
 			nuevoUsuario.Nombre,
 			nuevoUsuario.Email,
 			nuevoUsuario.Contrasenia,
@@ -90,7 +99,7 @@ func PrepararRutas() *gin.Engine {
 		}
 
 		// 1. Llamar a la función Login
-		user, err := auth.Login(credenciales.Usuario, credenciales.Contrasenia)
+		user, err := autenticador.Login(credenciales.Usuario, credenciales.Contrasenia)
 
 		// 2. Manejar error de autenticación
 		// Si el login falla (credenciales inválidas o no encontrado)
@@ -102,7 +111,7 @@ func PrepararRutas() *gin.Engine {
 		// Si el login es exitoso, generar token
 
 		// 3. Generar el JWT
-		tokenModel, tokenErr := auth.GenerarJWT(user.Email, user.ID, user.Rol)
+		jwt, tokenErr := autenticador.GenerarJWT(user.Email, user.ID, user.Rol)
 
 		if tokenErr != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo generar el token"})
@@ -111,7 +120,7 @@ func PrepararRutas() *gin.Engine {
 
 		// 3. Devolver la string del token
 		c.JSON(http.StatusOK, gin.H{
-			"token":   tokenModel.TokenJWT,
+			"token":   jwt.TokenJWT,
 			"user_id": user.ID,
 			"rol":     user.Rol,
 		})
@@ -119,26 +128,26 @@ func PrepararRutas() *gin.Engine {
 
 	// Endpoint de health check
 	r.GET("/health", func(c *gin.Context) {
-		client := &http.Client{
+		cliente := &http.Client{
 			Timeout: 5 * time.Second,
 		}
 
-		// Verificar estado de Go (siempre UP si llegamos aquí)
-		goStatus := "UP"
+		// Verificar estado de Go (siempre ARRIBA si llegamos aquí)
+		goStatus := "ARRIBA"
 
 		// Verificar estado de Python
-		pythonStatus := checkServiceHealth(client, pythonServiceURL+"/health")
+		pythonSalud := revisarSalud(cliente, pythonURL+"/health")
 
 		// Verificar estado de Java
-		javaStatus := checkServiceHealth(client, javaServiceURL+"/health")
+		javaSalud := revisarSalud(cliente, javaURL+"/health")
 
 		// Determinar estado general
-		overallStatus := "UP"
-		if pythonStatus == "DOWN" || javaStatus == "DOWN" {
+		overallStatus := "ARRIBA"
+		if pythonSalud == "CAÍDO" || javaSalud == "CAÍDO" {
 			overallStatus = "DEGRADED"
 		}
-		if pythonStatus == "DOWN" && javaStatus == "DOWN" {
-			overallStatus = "DOWN"
+		if pythonSalud == "CAÍDO" && javaSalud == "CAÍDO" {
+			overallStatus = "CAÍDO"
 		}
 
 		c.JSON(http.StatusOK, gin.H{
@@ -148,10 +157,10 @@ func PrepararRutas() *gin.Engine {
 					"status": goStatus,
 				},
 				"python": gin.H{
-					"status": pythonStatus,
+					"status": pythonSalud,
 				},
 				"java": gin.H{
-					"status": javaStatus,
+					"status": javaSalud,
 				},
 			},
 			"timestamp": time.Now().Format(time.RFC3339),
@@ -160,7 +169,7 @@ func PrepararRutas() *gin.Engine {
 
 	// Rutas protegidas
 	protegidas := r.Group("/")
-	protegidas.Use(auth.JWTMiddleware())
+	protegidas.Use(autenticador.JWTMiddleware())
 
 	{
 		// Endpoint para cerrar sesión (Logout)
@@ -179,7 +188,7 @@ func PrepararRutas() *gin.Engine {
 			}
 
 			// 2. Llamar a la función de revocación en la BD
-			err := auth.RevocarToken(tokenString)
+			err := autenticador.RevocarToken(tokenString)
 
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al revocar el token en la base de datos"})
@@ -190,24 +199,66 @@ func PrepararRutas() *gin.Engine {
 			c.JSON(http.StatusOK, gin.H{"mensaje": "Sesión cerrada con éxito. Token revocado."})
 		})
 
-		// Las rutas de proxy existentes ahora van dentro del grupo protegido:
-		r.Any("/python/*path", ReverseProxy(pythonServiceURL)) // Ya no requiere el middleware aquí
-		r.Any("/java/*path", ReverseProxy(javaServiceURL))     // Ya no requiere el middleware aquí
+		protegidas.Any("/python/*path", ReverseProxy(pythonURL))
+		protegidas.Any("/java/*path", ReverseProxy(javaURL))
+	}
+
+	// Rutas protegidas para administradores
+	admin := r.Group("/admin")
+	admin.Use(autenticador.JWTMiddleware())
+	admin.Use(autenticador.AutorizarRol("Administrador"))
+
+	{
+		// Endpoint para ver el estado de Rate Limit (LimiteIP)
+		admin.GET("/rate-limit", func(c *gin.Context) {
+			// Obtener el parámetro 'limit' (opcional)
+			limitStr := c.DefaultQuery("limit", "50")
+			limit, err := strconv.Atoi(limitStr)
+			if err != nil {
+				limit = 50 // Usar el valor por defecto si la conversión falla
+			}
+
+			limites, err := database.ObtenerLimitesIP(limit)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error consultando LimitesIP", "detalle": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, limites)
+		})
+
+		// Endpoint para ver el Log de Peticiones (LogPeticion)
+		admin.GET("/logs", func(c *gin.Context) {
+			// Obtener el parámetro 'limit' (opcional)
+			limiteStr := c.DefaultQuery("limit", "100")
+			limite, err := strconv.Atoi(limiteStr)
+			if err != nil {
+				limite = 100 // Usar el valor por defecto si la conversión falla
+			}
+
+			logs, err := database.ObtenerLogsPeticion(limite)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error consultando LogsPeticion", "detalle": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, logs)
+		})
 	}
 
 	return r
 }
 
-// checkServiceHealth verifica el estado de un servicio
-func checkServiceHealth(client *http.Client, url string) string {
+// revisarSalud verifica el estado de un servicio
+func revisarSalud(client *http.Client, url string) string {
 	resp, err := client.Get(url)
 	if err != nil {
-		return "DOWN"
+		return "CAÍDO"
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
-		return "UP"
+		return "ARRIBA"
 	}
-	return "DOWN"
+	return "CAÍDO"
 }

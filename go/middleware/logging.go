@@ -29,10 +29,10 @@ func LogPeticiones() gin.HandlerFunc {
 			}
 		}
 		go func() {
-			query := `INSERT INTO "LogPeticion" (ip, ruta, metodo, fecha, id_usuario) 
+			consulta := `INSERT INTO "LogPeticion" (ip, ruta, metodo, fecha, id_usuario) 
              VALUES ($1, $2, $3, $4, $5)`
 
-			_, err := database.DB.Exec(query, ip, ruta, metodo, time.Now(), sqlIDUsuario)
+			_, err := database.BD.Exec(consulta, ip, ruta, metodo, time.Now(), sqlIDUsuario)
 
 			if err != nil {
 				println("Error registrando petición:", err.Error())

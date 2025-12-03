@@ -9,36 +9,40 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
-
-type Config struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBName   string
-	SSLMode  string
+type BaseDatos struct {
+	Config
 }
 
-func Connect(config Config) error {
+var BD *sql.DB
+
+type Config struct {
+	Host       string
+	Puerto     int
+	Usuario    string
+	Contrasena string
+	Nombre     string
+	SSLMode    string
+}
+
+func (bd BaseDatos) Conectar(config Config) error {
 	connStr := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode,
+		config.Host, config.Puerto, config.Usuario, config.Contrasena, config.Nombre, config.SSLMode,
 	)
 
 	var err error
-	DB, err = sql.Open("postgres", connStr)
+	BD, err = sql.Open("postgres", connStr)
 	if err != nil {
 		return fmt.Errorf("error abriendo conexión: %w", err)
 	}
 
 	// Configurar pool de conexiones
-	DB.SetMaxOpenConns(25)
-	DB.SetMaxIdleConns(5)
-	DB.SetConnMaxLifetime(5 * time.Minute)
+	BD.SetMaxOpenConns(25)
+	BD.SetMaxIdleConns(5)
+	BD.SetConnMaxLifetime(5 * time.Minute)
 
 	// Verificar conexión
-	if err = DB.Ping(); err != nil {
+	if err = BD.Ping(); err != nil {
 		return fmt.Errorf("error verificando conexión: %w", err)
 	}
 
@@ -46,8 +50,8 @@ func Connect(config Config) error {
 	return nil
 }
 
-func Close() {
-	if DB != nil {
-		DB.Close()
+func (bd BaseDatos) Cerrar() {
+	if BD != nil {
+		BD.Close()
 	}
 }
