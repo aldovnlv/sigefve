@@ -31,7 +31,7 @@ func (router Router) PrepararRutas() *gin.Engine {
 	r.Use(middleware.LogPeticiones())
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		// AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
