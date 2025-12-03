@@ -184,6 +184,8 @@ services:
     hostname: nginx-apigo
     container_name: nginx-apigo
     image: nginx:1.27.3-bookworm
+    depends_on:
+      - frontend-react
     ports:
       - "13000:80"
     volumes:
