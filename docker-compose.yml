@@ -151,9 +151,9 @@ services:
     hostname: frontend-react
     container_name: frontend-react
     image: debian:12.1
-  
-   # ports:
-   #   - "13000:13000"
+
+    # ports:
+    #   - "13000:13000"
     restart: unless-stopped
     # depends_on:
     #   - postgresql_java
@@ -168,7 +168,7 @@ services:
         echo instalando jdk ...
         apt install -y npm > /dev/null 2>&1
         echo Dependencias instaladas ...
-        
+
         cd /root/react
         pwd
         ls -la
@@ -178,9 +178,8 @@ services:
     volumes:
       - ${SIGEFVE_BIND_BASE_PATH}/frontend:/root/react
       - ${SIGEFVE_PERSISTENCE_PATH}/frontend/node_modules:/root/react/node_modules
-      - ${SIGEFVE_PERSISTENCE_PATH}/frontend/build:/root/react/build
+      - ${SIGEFVE_PERSISTENCE_PATH}/frontend/build:/root/react/dist
 
-  
   nginx-apigo:
     hostname: nginx-apigo
     container_name: nginx-apigo
@@ -190,5 +189,3 @@ services:
     volumes:
       #- ${SIGEFVE_BIND_BASE_PATH}/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ${SIGEFVE_PERSISTENCE_PATH}/frontend/build:/usr/share/nginx/html
-
-     
