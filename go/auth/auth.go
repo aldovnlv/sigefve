@@ -1,3 +1,5 @@
+// auth/auth.go
+
 package auth
 
 import (
@@ -15,8 +17,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Secreto hardcodeado
 var jwtSecret = []byte("a8048938767d1b374f2483b936b3e6bb")
 
+// Factor de costo bcrypt=10 representa 2^10=1024 iteraciones
 const bcryptCost = 10
 
 type InfoJWT struct {
@@ -28,7 +32,6 @@ type InfoJWT struct {
 
 type Autenticador struct{}
 
-// RegistrarUsuario inserta un nuevo usuario en la base de datos después de hashear la contraseña.
 func (a Autenticador) RegistrarUsuario(nombre, email, contrasena, rol string) (models.Usuario, error) {
 	var count int
 	err := database.BD.QueryRow(`SELECT COUNT(*) FROM "Usuario" WHERE email = $1`, email).Scan(&count)
@@ -39,7 +42,6 @@ func (a Autenticador) RegistrarUsuario(nombre, email, contrasena, rol string) (m
 		return models.Usuario{}, errors.New("el email ya está registrado")
 	}
 
-	// 2. Hashear la contraseña
 	hash, err := hashContrasena(contrasena)
 	if err != nil {
 		return models.Usuario{}, err
@@ -47,18 +49,17 @@ func (a Autenticador) RegistrarUsuario(nombre, email, contrasena, rol string) (m
 
 	fechaCreacion := time.Now()
 
-	// 3. Insertar en la BD y obtener el ID
 	var newUserID int
 	consulta := `INSERT INTO "Usuario" (nombre, email, contrasena_hash, rol, fecha_creacion) 
               VALUES ($1, $2, $3, $4, $5) RETURNING id`
 
-	// Asumimos PostgreSQL (usando RETURNING id)
+	// RETURNING id es extensión PostgreSQL que evita una consulta
+	// adicional para consultar el último id agregado
 	err = database.BD.QueryRow(consulta, nombre, email, hash, rol, fechaCreacion).Scan(&newUserID)
 	if err != nil {
 		return models.Usuario{}, err
 	}
 
-	// 4. Devolver el nuevo usuario (sin el hash)
 	return models.Usuario{
 		ID:            newUserID,
 		Nombre:        nombre,
@@ -72,7 +73,6 @@ func (a Autenticador) Login(email, password string) (models.Usuario, error) {
 	consulta := `SELECT id, nombre, email, rol, contrasena_hash, fecha_creacion 
               FROM "Usuario" WHERE email = $1`
 
-	// Solo se espera un resultado
 	row := database.BD.QueryRow(consulta, email)
 
 	var user models.Usuario
@@ -99,13 +99,13 @@ func (a Autenticador) Login(email, password string) (models.Usuario, error) {
 		return models.Usuario{}, errors.New("credenciales inválidas")
 	}
 
-	// Se borra la contraseña por seguridad
+	// Limpieza del hash antes de retorno: previene fuga accidental del hash
+	// en logs o respuestas API
 	user.ContrasenaHash = ""
 
 	return user, nil
 }
 
-// GenerarJWT genera un token JWT y lo guarda en la base de datos
 func (a Autenticador) GenerarJWT(usuario string, idUsuario int, rol string) (models.Token, error) {
 	expiracion := time.Now().Add(24 * time.Hour)
 	fechaEmision := time.Now()
@@ -126,19 +126,20 @@ func (a Autenticador) GenerarJWT(usuario string, idUsuario int, rol string) (mod
 		return models.Token{}, err
 	}
 
-	// 1. Guardar token en la base de datos y obtener el ID
 	consulta := `INSERT INTO "Token" (id_usuario, token_jwt, fecha_emision, fecha_expiracion) 
              VALUES ($1, $2, $3, $4) RETURNING id`
 
-	var newTokenID int // Variable para capturar el ID de la nueva fila
+	var newTokenID int
 
+	// Persistencia de tokens en base de datos implementa lista blanca:
+	// permite revocación antes de expiración natural, superando limitación
+	// de JWT (aunque añade latencia de consulta en cada validación)
 	err = database.BD.QueryRow(consulta, idUsuario, tokenString, fechaEmision, expiracion).Scan(&newTokenID)
 
 	if err != nil {
 		return models.Token{}, err
 	}
 
-	// 2. Devolver el modelo Token completamente poblado
 	tokenModel := models.Token{
 		ID:              newTokenID,
 		IDUsuario:       idUsuario,
@@ -150,10 +151,10 @@ func (a Autenticador) GenerarJWT(usuario string, idUsuario int, rol string) (mod
 	return tokenModel, nil
 }
 
-// validarToken valida el JWT y verifica que esté activo en la BD
 func validarToken(tokenString string) (*InfoJWT, error) {
 	infoJWT := &InfoJWT{}
 
+	// ParseWithClaims verifica la intregridad de la firma criptográfica
 	token, err := jwt.ParseWithClaims(tokenString, infoJWT, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
@@ -162,7 +163,8 @@ func validarToken(tokenString string) (*InfoJWT, error) {
 		return nil, err
 	}
 
-	// Verificar que el token exista en la BD y no haya expirado
+	// Combina validación criptográfica del JWT con verificación de existencia en BD,
+	// permitiendo revocación inmediata mientras mantiene beneficios de distribución del JWT
 	var fechaExpiracion time.Time
 	consulta := `SELECT fecha_expiracion FROM "Token" WHERE token_jwt = $1`
 	err = database.BD.QueryRow(consulta, tokenString).Scan(&fechaExpiracion)
@@ -174,7 +176,8 @@ func validarToken(tokenString string) (*InfoJWT, error) {
 		return nil, err
 	}
 
-	// Verificar que no haya expirado en la BD
+	// Aunque el JWT incluye claim exp, se valida también contra BD para detectar
+	// desincronización de relojes o manipulación de timestamps del sistema
 	if time.Now().After(fechaExpiracion) {
 		return nil, jwt.ErrTokenExpired
 	}
@@ -182,17 +185,15 @@ func validarToken(tokenString string) (*InfoJWT, error) {
 	return infoJWT, nil
 }
 
-// RevocarToken elimina un token de la base de datos, invalidándolo inmediatamente.
 func (a Autenticador) RevocarToken(tokenString string) error {
 	consulta := `DELETE FROM "Token" WHERE token_jwt = $1`
 
-	// Ejecutamos la eliminación.
+	// Revocación mediante eliminación
 	_, err := database.BD.Exec(consulta, tokenString)
 
 	return err
 }
 
-// JWTMiddleware middleware para proteger rutas
 func (a Autenticador) JWTMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -202,6 +203,8 @@ func (a Autenticador) JWTMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Extracción del token removiendo prefijo Bearer estándar RFC 6750:
+		// formato "Authorization: Bearer <token>" para tokens OAuth 2.0/JWT
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		infoJWT, err := validarToken(tokenString)
 		if err != nil {
@@ -210,7 +213,8 @@ func (a Autenticador) JWTMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Guardar información del usuario en el contexto
+		// Inyección de claims en contexto de Gin: propaga información de autenticación
+		// a manejadores sin re-parseo
 		c.Set("usuario", infoJWT.Usuario)
 		c.Set("id_usuario", infoJWT.IDUsuario)
 		c.Set("rol", infoJWT.Rol)
@@ -220,10 +224,11 @@ func (a Autenticador) JWTMiddleware() gin.HandlerFunc {
 	}
 }
 
-// AutorizarRol crea un middleware que restringe el acceso a un rol específico.
 func (a Autenticador) AutorizarRol(rolRequerido string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. Obtener el rol del contexto (establecido previamente por JWTMiddleware)
+		// Middleware de autorización basado en roles: separación de
+		// responsabilidades donde JWTMiddleware maneja autenticación
+		// y AutorizarRol maneja autorización
 		rolAny, existe := c.Get("rol")
 
 		if !existe {
@@ -239,26 +244,26 @@ func (a Autenticador) AutorizarRol(rolRequerido string) gin.HandlerFunc {
 			return
 		}
 
-		// 2. Comprobar si el rol actual coincide con el rol requerido
+		// Comparación estricta de rol
 		if rolActual != rolRequerido {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Acceso denegado: Se requiere rol de " + rolRequerido})
 			c.Abort()
 			return
 		}
 
-		// Si el rol coincide, continuar con la petición
 		c.Next()
 	}
 }
 
-// verificarContrasena compara la contraseña con el hash
 func verificarContrasena(hash, contrasena string) bool {
+	// bcrypt usa comparación de tiempo constante evitando filtración de información sobre
+	// similitud entre hash almacenado y contraseña proporcionada
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(contrasena))
 	return err == nil
 }
 
-// hashContrasena genera un hash bcrypt
 func hashContrasena(contrasena string) (string, error) {
+	// Cada hash es único incluso para contraseñas idénticas
 	bytes, err := bcrypt.GenerateFromPassword([]byte(contrasena), bcryptCost)
 	return string(bytes), err
 }
