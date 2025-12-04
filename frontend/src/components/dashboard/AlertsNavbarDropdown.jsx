@@ -30,14 +30,14 @@ const AlertsNavbarDropdown = ({ alerts }) => {
       {alerts.map((alert) => (
         <div
           key={alert.id}
-          className={`alert-item ${priorityClass(alert.priority)}`}
+          className={`alert-item ${priorityClass(alert.prioridad)}`}
         >
-          <div className="alert-title">{alert.title}</div>
+          <div className="alert-title">{alert.titulo}</div>
           <div className="alert-meta">
-            {alert.description}
+            {alert.descripcion}
             <br />
             <span>
-              Vehículo: <strong>{alert.vehicleId}</strong> · Prioridad: {alert.priority}
+              Vehículo: <strong>{alert.id_vehiculo}</strong> · Prioridad: {alert.prioridad}
             </span>
           </div>
         </div>

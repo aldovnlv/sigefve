@@ -7,9 +7,9 @@ import { dashboardController } from '../controllers/DashboardController';
 import { useNavigate } from 'react-router-dom';
 
 const DashboardView = () => {
-  const [vehicles, setVehicles] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [stats, setStats] = useState(null);
+  const [vehiculos, setVehiculos] = useState([]);
+  const [alertas, setAlertas] = useState([]);
+  const [estadisticas, setEstadisticas] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -17,10 +17,10 @@ const DashboardView = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const { vehicles, alerts, stats } = await dashboardController.loadDashboardData();
-        setVehicles(vehicles);
-        setAlerts(alerts);
-        setStats(stats);
+        const { vehiculos, alertas, estadisticas } = await dashboardController.cargarDatosDelDashboard();
+        setVehiculos(vehiculos);
+        setAlertas(alertas);
+        setEstadisticas(estadisticas);
       } catch (err) {
         console.error('Error al cargar dashboard', err);
       } finally {
@@ -31,20 +31,20 @@ const DashboardView = () => {
     load();
   }, []);
 
-  const focusedVehicle = vehicles[0] || null;
+  const focusedVehicle = vehiculos[0] || null;
 
   return (
     <div className="app-shell">
-      <Navbar alerts={alerts} />
+      <Navbar alerts={alertas} />
 
       <main className="dashboard-layout">
         <section className="grid-stack-vertical">
           <MapWidget focusedVehicle={focusedVehicle} />
-          <VehicleList vehicles={vehicles} />
+          <VehicleList vehicles={vehiculos} />
         </section>
 
         <section className="grid-stack-vertical">
-          <StatsCards stats={stats} />
+          <StatsCards stats={estadisticas} />
 
           <div className="card">
             <div className="card-header">

@@ -1,14 +1,14 @@
 import { fleetService } from '../services/FleetService';
 
 class DashboardController {
-  async loadDashboardData() {
-    const [vehicles, alerts, stats] = await Promise.all([
+  async cargarDatosDelDashboard() {
+    const [vehiculos, alertas, estadisticas] = await Promise.all([
       fleetService.getVehicles(),
-      fleetService.getAlertsSortedByPriority(),
+      fleetService.getAlertasOrdenadasPorPrioridad(),
       fleetService.getStats()
     ]);
 
-    return { vehicles, alerts, stats };
+    return { vehiculos, alertas, estadisticas };
   }
 }
 

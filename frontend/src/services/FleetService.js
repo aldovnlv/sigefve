@@ -123,34 +123,37 @@ class FleetService {
 
   async getAlerts() {
     try {
-      const data = await apiGet('/python/alertas');
-
-      return data.map((a) => new Alert({
-        id: a.id || a.id_alerta || 'SIN_ID',
-        vehicleId: a.id_vehiculo || a.vehicle_id || a.vehiculo || 'SIN_VEHICULO',
-        title: a.titulo || a.title || 'Alerta',
-        description: a.descripcion || a.description || '',
-        priority: a.prioridad || a.priority || 'media',
-        createdAt: a.fecha || a.created_at || new Date().toISOString()
+      const alertas = await apiGet('/python/alertas');
+      // alert(alertas["alertas"][0].descripcion)
+      return alertas["alertas"].map((a) => new Alert({
+        titulo: 'Alerta',
+        descripcion: a.descripcion || '',
+        estado: a.estado || false,
+        fecha_generacion: a.fecha_generacion || new Date().toISOString(),
+        id: a.id || 'SIN_ID',
+        id_vehiculo: a.id_vehiculo || a.vehicle_id || a.vehiculo || 'SIN_VEHICULO',
+        mensaje: a.mensaje || '',
+        prioridad: a.prioridad || 0,
+        tipo: a.tipo || 'media',
       }));
     } catch (err) {
       console.error('Error cargando alertas desde API, creando alerta simulada.', err);
       return [
         new Alert({
           id: 'A-MOCK',
-          vehicleId: 'V-001',
-          title: 'Alerta simulada',
-          description: 'No se pudo obtener la lista real de alertas.',
-          priority: 'baja',
-          createdAt: new Date().toISOString()
+          id_vehiculo: 'V-001',
+          titulo: 'Alerta simulada',
+          descripcion: 'No se pudo obtener la lista real de alertas.',
+          tipo: 'baja',
+          fecha_generacion: new Date().toISOString()
         })
       ];
     }
   }
 
-  async getAlertsSortedByPriority() {
+  async getAlertasOrdenadasPorPrioridad() {
     const alerts = await this.getAlerts();
-    return [...alerts].sort((a, b) => b.getPriorityScore() - a.getPriorityScore());
+    return [...alerts].sort((a, b) => b.getClasePrioridad() - a.getClasePrioridad());
   }
 
   async getStats() {
