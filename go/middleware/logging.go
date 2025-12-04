@@ -1,3 +1,5 @@
+// middleware/logging.go
+
 package middleware
 
 import (
@@ -24,10 +26,11 @@ func LogPeticiones() gin.HandlerFunc {
 		// Intentar obtener el ID del usuario si está autenticado
 		if id, exists := c.Get("id_usuario"); exists {
 			if userID, ok := id.(int); ok {
-				// Si el ID existe y es válido, asignamos el valor y ponemos Valid = true
+				// Si el ID existe y es válido, se asignar el valor y Valid = true
 				sqlIDUsuario = sql.NullInt32{Int32: int32(userID), Valid: true}
 			}
 		}
+		// Reigstro de la petición en la base de datos
 		go func() {
 			consulta := `INSERT INTO "LogPeticion" (ip, ruta, metodo, fecha, id_usuario) 
              VALUES ($1, $2, $3, $4, $5)`
