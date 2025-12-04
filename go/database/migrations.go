@@ -1,11 +1,11 @@
 // database/migrations.go
+
 package database
 
 import (
 	"log"
 )
 
-// DDL (Data Definition Language) de las tablas
 const migracionDDL = `
 CREATE TABLE IF NOT EXISTS "Usuario" (
   "id" serial PRIMARY KEY,
@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS "Usuario" (
   "rol" varchar(20),
   "fecha_creacion" timestamp
 );
-
 CREATE TABLE IF NOT EXISTS "Token" (
   "id" serial PRIMARY KEY,
   "id_usuario" int NOT NULL,
@@ -23,7 +22,6 @@ CREATE TABLE IF NOT EXISTS "Token" (
   "fecha_emision" timestamp,
   "fecha_expiracion" timestamp
 );
-
 CREATE TABLE IF NOT EXISTS "LogPeticion" (
   "id" serial PRIMARY KEY,
   "ip" varchar(45),
@@ -32,7 +30,6 @@ CREATE TABLE IF NOT EXISTS "LogPeticion" (
   "fecha" timestamp,
   "id_usuario" int
 );
-
 CREATE TABLE IF NOT EXISTS "LimiteIP" (
   "id" serial PRIMARY KEY,
   "ip" varchar(45) UNIQUE NOT NULL,
@@ -40,7 +37,9 @@ CREATE TABLE IF NOT EXISTS "LimiteIP" (
   "ultima_peticion" timestamp,
   "bloqueado" boolean
 );
-
+-- Bloque PL/pgSQL para aplicación de claves foráneas:
+-- verifica existencia en catálogo del sistema (pg_constraint) antes de
+-- ejecutar ALTER TABLE, evitando errores en re-ejecuciones del script
 DO
 $$
 BEGIN
@@ -55,15 +54,12 @@ END
 $$;
 `
 
-// Migraciones ejecuta el esquema DDL.
 func (bd BaseDatos) Migraciones() error {
 	log.Println("Ejecutando migraciones de la base de datos...")
-
 	_, err := BD.Exec(migracionDDL)
 	if err != nil {
 		return err
 	}
-
 	log.Println("Migraciones completadas exitosamente.")
 	return nil
 }

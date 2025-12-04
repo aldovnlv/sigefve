@@ -1,3 +1,5 @@
+// gateway/router.go
+
 package gateway
 
 import (
@@ -25,8 +27,13 @@ func (router Router) PrepararRutas() *gin.Engine {
 
 	r := gin.Default()
 
+	// Configura rangos privados como proxies confiables para permitir
+	// que ClientIP() extraiga correctamente la IP real desde headers X-Forwarded-For
+	// en despliegues tras balanceadores de carga o proxies inversos
 	r.SetTrustedProxies([]string{"172.16.0.0/12", "192.168.0.0/16"})
 
+	// RateLimit primero para rechazar peticiones
+	// abusivas antes de procesamiento costoso (logging, autenticación)
 	r.Use(middleware.RateLimitMiddleware())
 	r.Use(middleware.LogPeticiones())
 
@@ -39,7 +46,6 @@ func (router Router) PrepararRutas() *gin.Engine {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Endpoint para registrar un nuevo usuario (público)
 	r.POST("/register", func(c *gin.Context) {
 		var nuevoUsuario struct {
 			Nombre      string `json:"nombre" binding:"required"`
@@ -48,18 +54,15 @@ func (router Router) PrepararRutas() *gin.Engine {
 			Rol         string `json:"rol"`
 		}
 
-		// 1. Validar y bindear el JSON de entrada
 		if err := c.ShouldBindJSON(&nuevoUsuario); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "detalle": err.Error()})
 			return
 		}
 
-		// Si el rol viene vacío, se asume que es 'Conductor' por defecto
 		if nuevoUsuario.Rol == "" {
 			nuevoUsuario.Rol = "Conductor"
 		}
 
-		// 2. Registrar el usuario en la BD
 		user, err := autenticador.RegistrarUsuario(
 			nuevoUsuario.Nombre,
 			nuevoUsuario.Email,
@@ -67,17 +70,17 @@ func (router Router) PrepararRutas() *gin.Engine {
 			nuevoUsuario.Rol,
 		)
 
-		// 3. Manejar errores
 		if err != nil {
+			// Diferenciación semántica de errores mediante códigos HTTP apropiados:
+			// 409 Conflict para violación de unicidad vs 500 para fallas sistémicas
 			status := http.StatusInternalServerError
 			if err.Error() == "el email ya está registrado" {
-				status = http.StatusConflict // 409 Conflict
+				status = http.StatusConflict
 			}
 			c.JSON(status, gin.H{"error": "Error al registrar usuario", "detalle": err.Error()})
 			return
 		}
 
-		// 4. Respuesta exitosa
 		c.JSON(http.StatusCreated, gin.H{
 			"mensaje": "Usuario creado exitosamente",
 			"id":      user.ID,
@@ -86,7 +89,6 @@ func (router Router) PrepararRutas() *gin.Engine {
 		})
 	})
 
-	// Endpoint para iniciar sesión
 	r.POST("/login", func(c *gin.Context) {
 		var credenciales struct {
 			Usuario     string `json:"username"`
@@ -98,19 +100,15 @@ func (router Router) PrepararRutas() *gin.Engine {
 			return
 		}
 
-		// 1. Llamar a la función Login
 		user, err := autenticador.Login(credenciales.Usuario, credenciales.Contrasenia)
 
-		// 2. Manejar error de autenticación
-		// Si el login falla (credenciales inválidas o no encontrado)
+		// Respuesta genérica ante fallo de autenticación: evita enumeración
+		// de usuarios (no revela si el usuario existe o si la contraseña es incorrecta)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario o contraseña incorrectos"})
 			return
 		}
 
-		// Si el login es exitoso, generar token
-
-		// 3. Generar el JWT
 		jwt, tokenErr := autenticador.GenerarJWT(user.Email, user.ID, user.Rol)
 
 		if tokenErr != nil {
@@ -118,7 +116,6 @@ func (router Router) PrepararRutas() *gin.Engine {
 			return
 		}
 
-		// 3. Devolver la string del token
 		c.JSON(http.StatusOK, gin.H{
 			"token":   jwt.TokenJWT,
 			"user_id": user.ID,
@@ -126,25 +123,24 @@ func (router Router) PrepararRutas() *gin.Engine {
 		})
 	})
 
-	// Endpoint de health check
+	// Verificación de salud: Permite monitoreo de disponibilidad parcial
+	// en arquitecturas distribuidas evitando falsos negativos tipo "todo o nada"
 	r.GET("/health", func(c *gin.Context) {
 		cliente := &http.Client{
 			Timeout: 5 * time.Second,
 		}
 
-		// Verificar estado de Go (siempre ARRIBA si llegamos aquí)
 		goStatus := "ARRIBA"
 
-		// Verificar estado de Python
 		pythonSalud := revisarSalud(cliente, pythonURL+"/health")
 
-		// Verificar estado de Java
 		javaSalud := revisarSalud(cliente, javaURL+"/health")
 
-		// Determinar estado general
+		// Lógica de estado agregado con tres niveles de granularidad:
+		// ARRIBA (todos funcionales), PARCIAL, CAÍDO (ninguno)
 		overallStatus := "ARRIBA"
 		if pythonSalud == "CAÍDO" || javaSalud == "CAÍDO" {
-			overallStatus = "DEGRADED"
+			overallStatus = "PARCIAL"
 		}
 		if pythonSalud == "CAÍDO" && javaSalud == "CAÍDO" {
 			overallStatus = "CAÍDO"
@@ -167,17 +163,17 @@ func (router Router) PrepararRutas() *gin.Engine {
 		})
 	})
 
-	// Rutas protegidas
+	// Patrón de agrupación con middleware en cadena: todas las rutas bajo
+	// protegidas usarán JWTMiddleware, implementando autorización centralizada
 	protegidas := r.Group("/")
 	protegidas.Use(autenticador.JWTMiddleware())
 
 	{
-		// Endpoint para cerrar sesión (Logout)
 		protegidas.POST("/logout", func(c *gin.Context) {
-			// 1. Obtener el token del contexto (guardado por JWTMiddleware)
+			// Extracción de token desde contexto de Gin: el middleware previo
+			// almacena el token parseado evitando re-parseo y validación duplicada
 			tokenAny, exists := c.Get("token")
 			if !exists {
-				// Esto no debería suceder si el middleware se ejecuta correctamente
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Token no encontrado en el contexto"})
 				return
 			}
@@ -187,7 +183,8 @@ func (router Router) PrepararRutas() *gin.Engine {
 				return
 			}
 
-			// 2. Llamar a la función de revocación en la BD
+			// Revocación mediante lista negra persistente: implementa invalidación
+			// de tokens antes de expiración natural
 			err := autenticador.RevocarToken(tokenString)
 
 			if err != nil {
@@ -195,27 +192,28 @@ func (router Router) PrepararRutas() *gin.Engine {
 				return
 			}
 
-			// 3. Respuesta exitosa
 			c.JSON(http.StatusOK, gin.H{"mensaje": "Sesión cerrada con éxito. Token revocado."})
 		})
 
+		// Proxy inverso: reescribe rutas preservando path original mediante
+		// wildcard (*), delegando enrutamiento específico a microservicios
 		protegidas.Any("/python/*path", ReverseProxy(pythonURL))
 		protegidas.Any("/java/*path", ReverseProxy(javaURL))
 	}
 
-	// Rutas protegidas para administradores
+	// Control de acceso basado en roles con 2 middlewares:
+	// autenticación (JWT) + autorización (rol específico)
 	admin := r.Group("/admin")
 	admin.Use(autenticador.JWTMiddleware())
 	admin.Use(autenticador.AutorizarRol("Administrador"))
 
 	{
-		// Endpoint para ver el estado de Rate Limit (LimiteIP)
 		admin.GET("/rate-limit", func(c *gin.Context) {
-			// Obtener el parámetro 'limit' (opcional)
+			// Previene sobrecarga de memoria al transferir conjuntos masivos de datos
 			limitStr := c.DefaultQuery("limit", "50")
 			limit, err := strconv.Atoi(limitStr)
 			if err != nil {
-				limit = 50 // Usar el valor por defecto si la conversión falla
+				limit = 50
 			}
 
 			limites, err := database.ObtenerLimitesIP(limit)
@@ -227,13 +225,11 @@ func (router Router) PrepararRutas() *gin.Engine {
 			c.JSON(http.StatusOK, limites)
 		})
 
-		// Endpoint para ver el Log de Peticiones (LogPeticion)
 		admin.GET("/logs", func(c *gin.Context) {
-			// Obtener el parámetro 'limit' (opcional)
 			limiteStr := c.DefaultQuery("limit", "100")
 			limite, err := strconv.Atoi(limiteStr)
 			if err != nil {
-				limite = 100 // Usar el valor por defecto si la conversión falla
+				limite = 100
 			}
 
 			logs, err := database.ObtenerLogsPeticion(limite)
@@ -249,7 +245,6 @@ func (router Router) PrepararRutas() *gin.Engine {
 	return r
 }
 
-// revisarSalud verifica el estado de un servicio
 func revisarSalud(client *http.Client, url string) string {
 	resp, err := client.Get(url)
 	if err != nil {

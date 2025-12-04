@@ -1,6 +1,11 @@
+// models/models.go
+
 package models
 
 import "time"
+
+// Archivo con las estructuras auxiliares que se usarán
+// en distintas partes del microservicio
 
 type Usuario struct {
 	ID             int       `db:"id"`
