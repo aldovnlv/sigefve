@@ -9,15 +9,18 @@ const VehicleDetailView = () => {
   const { id } = useParams();
   const [vehicle, setVehicle] = useState(null);
   const [alerts, setAlerts] = useState([]);
+  const [telemetriaVehiculo, setTelemetriaVehiculo] = useState(null);
 
   useEffect(() => {
     const load = async () => {
-      const [v, dashboardData] = await Promise.all([
+      const [v, dashboardData, telemetria] = await Promise.all([
         vehicleController.getVehicleById(id),
-        dashboardController.cargarDatosDelDashboard()
+        dashboardController.cargarDatosDelDashboard(),
+        vehicleController.getUltimaTelemetria(id)
       ]);
       setVehicle(v);
       setAlerts(dashboardData.alertas);
+      setTelemetriaVehiculo(telemetria);
     };
     load();
   }, [id]);
@@ -67,23 +70,10 @@ const VehicleDetailView = () => {
               </span>
             </p>
             <p>Batería: {vehicle.battery}%</p>
-            <p>Ubicación actual: {vehicle.lastLocation?.label}</p>
+            <p>Ubicación actual: {telemetriaVehiculo ? `${telemetriaVehiculo.latitud}, ${telemetriaVehiculo.longitud}` : vehicle.lastLocation?.label}</p>
             <p>KM totales: {vehicle.kmTotal.toLocaleString()} km</p>
             <p>Entregas hoy: {vehicle.deliveriesToday}</p>
 
-            <h3 style={{ marginTop: '1.2rem', fontSize: '0.95rem' }}>Alertas de este vehículo</h3>
-            {vehicleAlerts.length === 0 && (
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-                No hay alertas activas para esta unidad.
-              </p>
-            )}
-            {vehicleAlerts.map((a) => (
-              <div key={a.id} style={{ marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                <strong>{a.title}</strong>
-                <br />
-                <span style={{ color: 'var(--muted)' }}>{a.description}</span>
-              </div>
-            ))}
           </div>
         </div>
 
