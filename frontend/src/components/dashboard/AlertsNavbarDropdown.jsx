@@ -37,7 +37,7 @@ const AlertsNavbarDropdown = ({ alerts }) => {
             {alert.descripcion}
             <br />
             <span>
-              Vehículo: <strong>{alert.id_vehiculo}</strong> · Prioridad: {alert.prioridad}
+              <strong>{alert.mensaje}</strong> · Prioridad: {alert.tipo}
             </span>
           </div>
         </div>

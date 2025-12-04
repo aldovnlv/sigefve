@@ -1,7 +1,7 @@
 import BaseModel from './BaseModel';
 
 export default class FleetStats extends BaseModel {
-  constructor({ totalKm, deliveriesToday, availableVehicles }) {
+  constructor({ totalKm, entregasCompletadas, vehiculosDisponibles }) {
     super();
     /**
      * "eficiencia_bateria": 79.62,
@@ -11,7 +11,7 @@ export default class FleetStats extends BaseModel {
       "registros_procesados": 100
      */
     this.totalKm = totalKm;
-    this.deliveriesToday = deliveriesToday;
-    this.availableVehicles = availableVehicles;
+    this.deliveriesToday = entregasCompletadas; 
+    this.availableVehicles = vehiculosDisponibles;
   }
 }

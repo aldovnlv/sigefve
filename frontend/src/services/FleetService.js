@@ -94,7 +94,7 @@ class FleetService {
       const mappedData = {
         id: v.id || v.id_vehiculo || id,
         name: v.nombre || v.name || `Vehiculo ${id}`,
-        status: v.estado || v.status || 'DISPONIBLE',
+        status: v.estado || 'CARGANDO',
         battery: v.bateria || v.battery || 100,
         lastLocation: {
           lat: v.latitud ?? null,
@@ -159,16 +159,19 @@ class FleetService {
   async getEstadisticas() {
     try {
       const s = await apiGet('/python/estadisticas');
+      const v = await this.getVehiculos();
+      // obten la cantidad de vehiculos disponibles
+      const vehiculosDisponibles = v.filter((v) => v.status === 'DISPONIBLE').length;
       // s["estadisticas"]  contiene las estadisticas de cada vehiculo (s["estadisticas"][n]) las cuales son eficiencia_bateria, entregas_completadas, id_vehiculo, kilometros_totales, registros_procesados
       // suma cada una de las estadisticas de los vehiculos s["estadisticas"][n] para obtener las estadisticas totales
-      
+
       const totalKm = s.estadisticas.reduce((sum, v) => sum + (v.kilometros_totales || 0), 0);
-      const deliveriesToday = s.estadisticas.reduce((sum, v) => sum + (v.entregas_completadas || 0), 0);
+      const entregasCompletadas = s.estadisticas.reduce((sum, v) => sum + (v.entregas_completadas || 0), 0);
       const availableVehicles = s.estadisticas.reduce((sum, v) => sum + (v.eficiencia_bateria || 0), 0);
       return new FleetStats({
         totalKm,
-        deliveriesToday,
-        availableVehicles
+        entregasCompletadas,
+        vehiculosDisponibles
       });
     } catch (err) {
       console.error('Error cargando estadísticas desde API, calculando estadísticas locales.', err);
