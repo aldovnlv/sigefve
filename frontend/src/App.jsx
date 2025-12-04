@@ -22,7 +22,7 @@ const App = () => {
       />
 
       <Route
-        path="vehiculos/:id"
+        path="/vehiculos/:id"
         element={
           <ProtectedRoute isAuthenticated={authController.isAuthenticated()}>
             <VehicleDetailView />
