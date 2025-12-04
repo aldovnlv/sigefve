@@ -10,12 +10,12 @@ const DashboardView = () => {
   const [vehiculos, setVehiculos] = useState([]);
   const [alertas, setAlertas] = useState([]);
   const [estadisticas, setEstadisticas] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setCargando] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
+      setCargando(true);
       try {
         const { vehiculos, alertas, estadisticas } = await dashboardController.cargarDatosDelDashboard();
         setVehiculos(vehiculos);
@@ -24,7 +24,7 @@ const DashboardView = () => {
       } catch (err) {
         console.error('Error al cargar dashboard', err);
       } finally {
-        setLoading(false);
+        setCargando(false);
       }
     };
 

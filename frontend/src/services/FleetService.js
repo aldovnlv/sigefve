@@ -44,7 +44,7 @@ class FleetService {
     this._routes = [];
   }
 
-  async getVehicles() {
+  async getVehiculos() {
     try {
       const data = await apiGet('/java/vehiculos');
 
@@ -121,7 +121,7 @@ class FleetService {
     }
   }
 
-  async getAlerts() {
+  async getAlertas() {
     try {
       const alertas = await apiGet('/python/alertas');
       // alert(alertas["alertas"][0].descripcion)
@@ -152,22 +152,27 @@ class FleetService {
   }
 
   async getAlertasOrdenadasPorPrioridad() {
-    const alerts = await this.getAlerts();
+    const alerts = await this.getAlertas();
     return [...alerts].sort((a, b) => b.getClasePrioridad() - a.getClasePrioridad());
   }
 
-  async getStats() {
+  async getEstadisticas() {
     try {
       const s = await apiGet('/python/estadisticas');
-
+      // s["estadisticas"]  contiene las estadisticas de cada vehiculo (s["estadisticas"][n]) las cuales son eficiencia_bateria, entregas_completadas, id_vehiculo, kilometros_totales, registros_procesados
+      // suma cada una de las estadisticas de los vehiculos s["estadisticas"][n] para obtener las estadisticas totales
+      
+      const totalKm = s.estadisticas.reduce((sum, v) => sum + (v.kilometros_totales || 0), 0);
+      const deliveriesToday = s.estadisticas.reduce((sum, v) => sum + (v.entregas_completadas || 0), 0);
+      const availableVehicles = s.estadisticas.reduce((sum, v) => sum + (v.eficiencia_bateria || 0), 0);
       return new FleetStats({
-        totalKm: s.total_km || s.totalKm || 0,
-        deliveriesToday: s.entregas_hoy || s.deliveriesToday || 0,
-        availableVehicles: s.vehiculos_disponibles || s.availableVehicles || 0
+        totalKm,
+        deliveriesToday,
+        availableVehicles
       });
     } catch (err) {
       console.error('Error cargando estadísticas desde API, calculando estadísticas locales.', err);
-      const vehicles = await this.getVehicles();
+      const vehicles = await this.getVehiculos();
       const totalKm = vehicles.reduce((sum, v) => sum + (v.kmTotal || 0), 0);
       const deliveriesToday = vehicles.reduce((sum, v) => sum + (v.deliveriesToday || 0), 0);
       const availableVehicles = vehicles.filter((v) => v.isAvailable()).length;
