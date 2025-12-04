@@ -5,6 +5,7 @@ import Alert from '../models/Alert';
 import FleetStats from '../models/FleetStats';
 import Route from '../models/Route';
 import { apiGet } from './apiClient';
+import { apiPost } from './apiClient';
 
 class FleetService {
   constructor() {
@@ -143,7 +144,7 @@ class FleetService {
       if (mappedData.type && mappedData.type.toLowerCase() === 'motocicleta') {
         return new ElectricMotorcycle(mappedData);
       }
-      
+
       return new Vehicle(mappedData);
     } catch (err) {
       console.error('Error cargando vehículo desde API, buscando en datos simulados.', err);
@@ -214,13 +215,9 @@ class FleetService {
     }
   }
 
-  async createRoute(routeData) {
-    const newRoute = new Route({
-      id: `R-${this._routes.length + 1}`,
-      ...routeData
-    });
-    this._routes.push(newRoute);
-    return newRoute;
+  async crearRuta(routeData) {
+    const r = await apiPost('/java/rutas', routeData);
+    return r;
   }
 
   async getRoutes() {

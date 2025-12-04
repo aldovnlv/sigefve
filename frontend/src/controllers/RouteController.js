@@ -1,8 +1,8 @@
 import { fleetService } from '../services/FleetService';
 
 class RouteController {
-  async createRoute(routeData) {
-    return fleetService.createRoute(routeData);
+  async crearRuta(routeData) {
+    return fleetService.crearRuta(routeData);
   }
 
   async getRoutes() {

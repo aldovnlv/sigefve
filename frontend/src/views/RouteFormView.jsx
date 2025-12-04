@@ -5,22 +5,20 @@ import { routeController } from '../controllers/RouteController';
 import { dashboardController } from '../controllers/DashboardController';
 
 const RouteFormView = () => {
-  const [vehicleId, setVehicleId] = useState('');
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
-  const [plannedKm, setPlannedKm] = useState('');
-  const [notes, setNotes] = useState('');
+  const [vehiculoId, setVehiculoId] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [distanciaTotal, setDistanciaTotal] = useState('');
   const [alerts, setAlerts] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     const load = async () => {
-      const { vehicles, alerts } = await dashboardController.loadDashboardData();
-      setVehicles(vehicles);
-      setAlerts(alerts);
-      if (vehicles.length > 0) {
-        setVehicleId(vehicles[0].id);
+      const { vehiculos, alertas } = await dashboardController.cargarDatosDelDashboard();
+      setVehicles(vehiculos);
+      setAlerts(alertas);
+      if (vehiculos.length > 0) {
+        setVehiculoId(vehiculos[0].id);
       }
     };
     load();
@@ -31,21 +29,17 @@ const RouteFormView = () => {
     setMessage('');
 
     try {
-      const route = await routeController.createRoute({
-        vehicleId,
-        origin,
-        destination,
-        plannedKm: Number(plannedKm),
-        notes
+      const route = await routeController.crearRuta({
+        vehiculoId,
+        nombre,
+        distanciaTotal: Number(distanciaTotal)
       });
 
-      setMessage(`Ruta ${route.id} creada correctamente para el vehículo ${vehicleId}.`);
-      setOrigin('');
-      setDestination('');
-      setPlannedKm('');
-      setNotes('');
+      setMessage(`Ruta ${route.id} creada correctamente para el vehículo ${vehiculoId}.`);
+      setNombre('');
+      setDistanciaTotal('');
     } catch (err) {
-      setMessage('Error al crear la ruta.');
+      setMessage('Error al crear la rutao.');
     }
   };
 
@@ -67,8 +61,8 @@ const RouteFormView = () => {
                 <label className="form-label">Vehículo</label>
                 <select
                   className="form-input"
-                  value={vehicleId}
-                  onChange={(e) => setVehicleId(e.target.value)}
+                  value={vehiculoId}
+                  onChange={(e) => setVehiculoId(e.target.value)}
                 >
                   {vehicles.map((v) => (
                     <option key={v.id} value={v.id}>
@@ -80,47 +74,27 @@ const RouteFormView = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Origen</label>
+                  <label className="form-label">Nombre</label>
                   <input
+                    required
                     className="form-input"
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
                     placeholder="Bodega central"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Destino</label>
-                  <input
-                    className="form-input"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="Cliente final"
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
                   <label className="form-label">KM planeados</label>
                   <input
+                    required
                     className="form-input"
                     type="number"
-                    value={plannedKm}
-                    onChange={(e) => setPlannedKm(e.target.value)}
+                    value={distanciaTotal}
+                    onChange={(e) => setDistanciaTotal(e.target.value)}
                     placeholder="25"
                   />
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Notas</label>
-                <textarea
-                  className="form-input"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Instrucciones especiales, ventanas horarias, etc."
-                />
               </div>
 
               {message && (
