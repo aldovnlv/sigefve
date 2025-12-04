@@ -18,9 +18,11 @@ public class ClienteAPI {
     private String urlBaseSigefve = "http://sigefve-python:5001/";
 
     /**
+     * Envia una peticion POST asincrona a un endpoint especifico.
      * 
-     * @param endpoint
-     * @param cuerpoJson
+     * @param endpoint   El endpoint de la API al que se enviara la peticion (ej.
+     *                   "telemetria").
+     * @param cuerpoJson El cuerpo de la peticion en formato JSON.
      */
     public void peticionPost(String endpoint, String cuerpoJson){
         // Crear una instancia de HttpClient
