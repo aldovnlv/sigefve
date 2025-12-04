@@ -9,6 +9,11 @@ import java.sql.Statement;
 
 import com.sigefve.utils.InicializadorDatos;
 
+/**
+ * Clase Singleton para gestionar la configuración y conexión a la base de datos
+ * PostgreSQL.
+ * Se encarga de inicializar el esquema de la base de datos si no existe.
+ */
 public class ConfiguracionBaseDatos {
     private static final String URL = System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://postgresql_java:5432/sigefve");
     private static final String USUARIO = System.getenv().getOrDefault("DB_USER", "postgres");
@@ -16,6 +21,10 @@ public class ConfiguracionBaseDatos {
     
     private static ConfiguracionBaseDatos instancia;
     
+    /**
+     * Constructor privado para implementar el patrón Singleton.
+     * Carga el driver de PostgreSQL e inicializa el esquema de la base de datos.
+     */
     private ConfiguracionBaseDatos() {
         try {
             Class.forName("org.postgresql.Driver");
@@ -25,6 +34,13 @@ public class ConfiguracionBaseDatos {
         }
     }
     
+    /**
+     * Obtiene la instancia única de la configuración de la base de datos.
+     * Implementa Singleton con doble comprobación de bloqueo (double-checked
+     * locking).
+     * 
+     * @return La instancia única de ConfiguracionBaseDatos.
+     */
     public static ConfiguracionBaseDatos obtenerInstancia() {
         if (instancia == null) {
             synchronized (ConfiguracionBaseDatos.class) {
@@ -36,10 +52,21 @@ public class ConfiguracionBaseDatos {
         return instancia;
     }
     
+    /**
+     * Obtiene una nueva conexión a la base de datos.
+     * 
+     * @return Objeto Connection activo.
+     * @throws SQLException Si ocurre un error al conectar.
+     */
     public Connection obtenerConexion() throws SQLException {
         return DriverManager.getConnection(URL, USUARIO, CONTRASENA);
     }
     
+    /**
+     * Inicializa el esquema de la base de datos creando las tablas necesarias si no
+     * existen.
+     * También verifica si las tablas ya existen para evitar recrearlas.
+     */
     private void inicializarEsquema() {
         String[] sqlCreacionTablas = {
             // Tabla vehiculos

@@ -9,15 +9,23 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.util.concurrent.CompletableFuture;
 import java.lang.System;
 
+/**
+ * Cliente para interactuar con la API REST del sistema SIGEFVE.
+ * Permite enviar peticiones HTTP a los servicios backend.
+ */
+
 public class ClienteAPI {
 
     private String urlBaseSigefve = "http://sigefve-python:5001/";
 
     /**
+     * Envía una petición POST asíncrona a un endpoint específico.
      * 
-     * @param endpoint
-     * @param cuerpoJson
+     * @param endpoint   El endpoint de la API al que se enviará la petición (ej.
+     *                   "telemetria").
+     * @param cuerpoJson El cuerpo de la petición en formato JSON.
      */
+
     public void peticionPost(String endpoint, String cuerpoJson){
         // Crear una instancia de HttpClient
         HttpClient cliente = HttpClient.newHttpClient();
@@ -41,8 +49,10 @@ public class ClienteAPI {
     }
 
     /**
+     * Método principal para pruebas manuales del cliente API.
+     * Envía una telemetría de prueba.
      * 
-     * @param args
+     * @param args Argumentos de línea de comandos (no utilizados).
      */
     public static void main(String[] args) {
         ClienteAPI cliente = new ClienteAPI();

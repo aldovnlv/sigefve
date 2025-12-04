@@ -23,17 +23,38 @@ import java.time.format.DateTimeFormatter; //
 
 import java.lang.reflect.Type;
 
+/**
+ * Adaptador de Gson para serializar y deserializar objetos LocalDateTime.
+ * Utiliza un formato de fecha personalizado: "d::MMM::uuuu HH::mm::ss".
+ */
 public class LocalDateTimeTypeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
 
   private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d::MMM::uuuu HH::mm::ss");
 
+  /**
+   * Serializa un objeto LocalDateTime a su representación JSON.
+   * 
+   * @param localDateTime El objeto fecha-hora a serializar.
+   * @param srcType       El tipo del objeto fuente.
+   * @param context       Contexto de serialización.
+   * @return Un JsonElement que representa la fecha y hora.
+   */
   @Override
   public JsonElement serialize(LocalDateTime localDateTime, Type srcType,
       JsonSerializationContext context) {
     System.out.println("serialize");
     return new JsonPrimitive(formatter.format(localDateTime));
   }
-
+  
+  /**
+   * Deserializa un elemento JSON a un objeto LocalDateTime.
+   * 
+   * @param json    El elemento JSON a deserializar.
+   * @param typeOfT El tipo del objeto destino.
+   * @param context Contexto de deserialización.
+   * @return El objeto LocalDateTime resultante.
+   * @throws JsonParseException Si ocurre un error durante el parseo.
+   */
   @Override
   public LocalDateTime deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
