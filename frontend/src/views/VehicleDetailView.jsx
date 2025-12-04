@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Navbar from '../components/layout/Navbar';
-import MapWidget from '../components/dashboard/MapWidget';
+import BarraNavegacion from '../components/layout/BarraNavegacion';
+import MapaWidget from '../components/dashboard/MapaWidget';
 import { vehicleController } from '../controllers/VehicleController';
 import { dashboardController } from '../controllers/DashboardController';
 
@@ -27,7 +27,7 @@ const VehicleDetailView = () => {
   if (!vehicle) {
     return (
       <div className="app-shell">
-        <Navbar alerts={alerts} />
+        <BarraNavegacion alerts={alerts} />
         <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando vehículo...</div>
       </div>
     );
@@ -35,7 +35,7 @@ const VehicleDetailView = () => {
 
   return (
     <div className="app-shell">
-      <Navbar alerts={alerts} />
+      <BarraNavegacion alerts={alerts} />
       <div className="detail-layout">
         <div className="card">
           <div className="card-header">
@@ -87,7 +87,7 @@ const VehicleDetailView = () => {
           </div>
         </div>
 
-        <MapWidget focusedVehicle={vehicle} />
+        <MapaWidget focusedVehicle={vehicle} />
       </div>
     </div>
   );

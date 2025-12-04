@@ -6,7 +6,7 @@ const priorityClass = (priority) => {
   return 'alert-item-low';
 };
 
-const AlertsNavbarDropdown = ({ alerts }) => {
+const AlertasBarraNavegacionDespliegue = ({ alerts }) => {
   return (
     <div className="alert-dropdown">
       <div
@@ -46,4 +46,4 @@ const AlertsNavbarDropdown = ({ alerts }) => {
   );
 };
 
-export default AlertsNavbarDropdown;
+export default AlertasBarraNavegacionDespliegue;

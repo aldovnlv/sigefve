@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StatsCards = ({ stats }) => {
+const TarjetaEstadisticas = ({ stats }) => {
   if (!stats) return null;
 
   return (
@@ -31,4 +31,4 @@ const StatsCards = ({ stats }) => {
   );
 };
 
-export default StatsCards;
+export default TarjetaEstadisticas;

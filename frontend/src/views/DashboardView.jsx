@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../components/layout/Navbar';
-import MapWidget from '../components/dashboard/MapWidget';
-import VehicleList from '../components/dashboard/VehicleList';
-import StatsCards from '../components/dashboard/StatsCards';
+import BarraNavegacion from '../components/layout/BarraNavegacion';
+import MapaWidget from '../components/dashboard/MapaWidget';
+import ListaVehiculos from '../components/dashboard/ListaVehiculos';
+import TarjetaEstadisticas from '../components/dashboard/TarjetaEstadisticas';
 import { dashboardController } from '../controllers/DashboardController';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,16 +35,16 @@ const DashboardView = () => {
 
   return (
     <div className="app-shell">
-      <Navbar alerts={alertas} />
+      <BarraNavegacion alerts={alertas} />
 
       <main className="dashboard-layout">
         <section className="grid-stack-vertical">
-          <MapWidget focusedVehicle={focusedVehicle} />
-          <VehicleList vehicles={vehiculos} />
+          <MapaWidget focusedVehicle={focusedVehicle} />
+          <ListaVehiculos vehicles={vehiculos} />
         </section>
 
         <section className="grid-stack-vertical">
-          <StatsCards stats={estadisticas} />
+          <TarjetaEstadisticas stats={estadisticas} />
 
           <div className="card">
             <div className="card-header">

@@ -109,6 +109,15 @@ class FleetService {
     }
   }
 
+  async getUltimaTelemetria(id) {
+    try {
+      return await apiGet(`/java/telemetria/vehiculo/${id}/ultima`);
+    } catch (err) {
+      console.error(`Error obteniendo telemetría para vehículo ${id}`, err);
+      return null;
+    }
+  }
+
   async getVehicleById(id) {
     try {
       const v = await apiGet(`/java/vehiculos/${id}`);

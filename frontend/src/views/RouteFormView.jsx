@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/layout/Navbar';
+import BarraNavegacion from '../components/layout/BarraNavegacion';
 import { routeController } from '../controllers/RouteController';
 import { dashboardController } from '../controllers/DashboardController';
 
@@ -39,13 +39,13 @@ const RouteFormView = () => {
       setNombre('');
       setDistanciaTotal('');
     } catch (err) {
-      setMessage('Error al crear la rutao.');
+      setMessage('Error al crear la ruta.');
     }
   };
 
   return (
     <div className="app-shell">
-      <Navbar alerts={alerts} />
+      <BarraNavegacion alerts={alerts} />
 
       <div className="route-form">
         <div className="card">

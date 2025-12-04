@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MapWidget = ({ focusedVehicle }) => {
+const MapaWidget = ({ focusedVehicle }) => {
   if (!focusedVehicle) {
     return (
       <div className="card">
@@ -50,4 +50,4 @@ const MapWidget = ({ focusedVehicle }) => {
   );
 };
 
-export default MapWidget;
+export default MapaWidget;

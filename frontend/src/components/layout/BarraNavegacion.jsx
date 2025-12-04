@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import AlertsNavbarDropdown from '../dashboard/AlertsNavbarDropdown';
+import AlertasBarraNavegacionDespliegue from '../dashboard/AlertasBarraNavegacionDespliegue';
 import { authController } from '../../controllers/AuthController';
 
-const Navbar = ({ alerts }) => {
+const BarraNavegacion = ({ alerts }) => {
   const [open, setOpen] = useState(false);
   const payload = authController.getCurrentUserPayload();
   const unreadCount = alerts.length;
@@ -27,7 +27,7 @@ const Navbar = ({ alerts }) => {
             🔔
           </span>
           {unreadCount > 0 && <span className="alert-badge">{unreadCount}</span>}
-          {open && <AlertsNavbarDropdown alerts={alerts} />}
+          {open && <AlertasBarraNavegacionDespliegue alerts={alerts} />}
         </div>
 
         <div className="user-chip">
@@ -46,4 +46,4 @@ const Navbar = ({ alerts }) => {
   );
 };
 
-export default Navbar;
+export default BarraNavegacion;
