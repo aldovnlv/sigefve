@@ -44,6 +44,25 @@ class FleetService {
     this._routes = [];
   }
 
+  /**
+   * 
+    {
+      capacidadCarga: v.capacidadCarga,
+      numeroAsientos: v.numeroAsientos,
+      capacidadBateria: v.capacidadBateria,
+      autonomiaMaxima: v.autonomiaMaxima,
+      consumoPromedio: v.consumoPromedio,
+      placa: v.placa,
+      modelo: v.modelo,
+      anio: v.anio,
+      estado: v.estado,
+      tipo: v.tipo,
+      kilometrajeTotal: v.kilometrajeTotal,
+      fechaRegistro: v.fechaRegistro,
+      ultimaActualizacion: v.ultimaActualizacion,
+    }
+   */
+
   async getVehiculos() {
     try {
       const data = await apiGet('/java/vehiculos');
@@ -68,7 +87,9 @@ class FleetService {
           avgConsumption: v.consumoPromedio,
           year: v.anio,
           registrationDate: v.fechaRegistro,
-          lastUpdate: v.ultimaActualizacion
+          lastUpdate: v.ultimaActualizacion,
+          placa: v.placa || 'SIN_PLACA',
+          modelo: v.modelo || 'SIN_MODELO'
         };
 
         if (mappedData.type && mappedData.type.toLowerCase() === 'bicicleta') {
@@ -89,7 +110,7 @@ class FleetService {
 
   async getVehicleById(id) {
     try {
-      const v = await apiGet(`/vehiculos/${id}`);
+      const v = await apiGet(`/java/vehiculos/${id}`);
 
       const mappedData = {
         id: v.id || v.id_vehiculo || id,
@@ -103,7 +124,16 @@ class FleetService {
         },
         kmTotal: v.km_total || v.kmTotal || 0,
         deliveriesToday: v.entregas_hoy || v.deliveriesToday || 0,
-        type: v.tipo || v.type || 'carro'
+        type: v.tipo || v.type || 'carro',
+        loadCapacity: v.capacidadCarga,
+        seats: v.numeroAsientos,
+        maxRange: v.autonomiaMaxima,
+        avgConsumption: v.consumoPromedio,
+        year: v.anio,
+        registrationDate: v.fechaRegistro,
+        lastUpdate: v.ultimaActualizacion,
+        placa: v.placa || 'SIN_PLACA',
+        modelo: v.modelo || 'SIN_MODELO'
       };
 
       if (mappedData.type && mappedData.type.toLowerCase() === 'bicicleta') {
@@ -113,7 +143,7 @@ class FleetService {
       if (mappedData.type && mappedData.type.toLowerCase() === 'motocicleta') {
         return new ElectricMotorcycle(mappedData);
       }
-
+      
       return new Vehicle(mappedData);
     } catch (err) {
       console.error('Error cargando vehículo desde API, buscando en datos simulados.', err);

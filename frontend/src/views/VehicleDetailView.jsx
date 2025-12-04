@@ -14,10 +14,10 @@ const VehicleDetailView = () => {
     const load = async () => {
       const [v, dashboardData] = await Promise.all([
         vehicleController.getVehicleById(id),
-        dashboardController.loadDashboardData()
+        dashboardController.cargarDatosDelDashboard()
       ]);
       setVehicle(v);
-      setAlerts(dashboardData.alerts);
+      setAlerts(dashboardData.alertas);
     };
     load();
   }, [id]);
@@ -59,8 +59,8 @@ const VehicleDetailView = () => {
                   (vehicle.status === 'DISPONIBLE' || vehicle.status === 'online'
                     ? 'chip-success'
                     : vehicle.status === 'EN_RUTA' || vehicle.status === 'en_ruta'
-                    ? 'chip-warning'
-                    : 'chip-muted')
+                      ? 'chip-warning'
+                      : 'chip-muted')
                 }
               >
                 {vehicle.getStatusLabel()}

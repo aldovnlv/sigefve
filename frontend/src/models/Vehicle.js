@@ -16,8 +16,11 @@ export default class Vehicle extends BaseModel {
     avgConsumption,
     year,
     registrationDate,
-    lastUpdate
+    lastUpdate,
+    placa,
+    modelo
   }) {
+    
     super();
     this.id = id;
     this.name = name;
@@ -34,6 +37,8 @@ export default class Vehicle extends BaseModel {
     this.year = year || 0;
     this.registrationDate = registrationDate || null;
     this.lastUpdate = lastUpdate || null;
+    this.placa = placa || 'SIN_PLACA';
+    this.modelo = modelo || 'SIN_MODELO';
   }
 
   getStatusLabel() {
