@@ -9,6 +9,10 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.util.concurrent.CompletableFuture;
 import java.lang.System;
 
+/**
+ * Cliente para interactuar con la API REST del sistema SIGEFVE.
+ * Permite enviar peticiones HTTP a los servicios backend.
+ */
 public class ClienteAPI {
 
     private String urlBaseSigefve = "http://sigefve-python:5001/";
