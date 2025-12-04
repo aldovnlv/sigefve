@@ -124,7 +124,7 @@ func RateLimitMiddleware() gin.HandlerFunc {
 		}
 
 		// Incrementa el contador de peticiones
-		conteo++
+		conteo = conteo + 1
 
 		// Si se excede el límite, bloquea la IP
 		if conteo > MaxPeticiones {
